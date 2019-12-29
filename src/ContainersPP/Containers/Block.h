@@ -27,9 +27,12 @@ namespace ContainersPP {
         
         /// get number of bytes in Block
         virtual uint64_t Size() const override;  
-        using iBlockD::Add;
+        using iBlockD::AddBack;
         /// add uninitialized bytes to Block, return pointer to start
-        virtual uint8_t* Add(uint64_t numBytes) override;
+        virtual uint8_t* AddBack(uint64_t numBytes) override;
+        using iBlockD::AddFront;
+        /// add uninitialized bytes to front of Block, return pointer to start
+        virtual uint8_t* AddFront(uint64_t numBytes) override;
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) override;
         /// clear the Block (deletes content, keeps capacity)
@@ -42,11 +45,7 @@ namespace ContainersPP {
 
     protected:
         /// (re-)allocate Block
-        void alloc(uint64_t newCapacity);
-        /// (re-)allocate Block
-        void allocAdd(uint64_t sizeAdd);
-        /// (re-)allocate Block
-        void allocSubtract(uint64_t sizeSub);
+        void alloc(uint64_t newCapacity, uint64_t offset = 0);
         /// (re-)allocate Block
         void allocRemove(uint64_t offset, uint64_t sizeRemove);
         /// destroy Block
@@ -65,52 +64,25 @@ namespace ContainersPP {
     }
 
     //------------------------------------------------------------------------------
-    inline
-        Block::~Block() {
-        this->destroy();
+    inline Block::~Block() {
+        destroy();
     }
 
     //------------------------------------------------------------------------------
-    inline void Block::alloc(uint64_t newCapacity) {
+    inline void Block::alloc(uint64_t newCapacity ,uint64_t offset) {
         o_assert_dbg(newCapacity > Size());
 
         uint8_t* newBuf = (uint8_t*)Oryol::Memory::Alloc((int)newCapacity);
         if (size > 0) {
             o_assert_dbg(data);
-            Oryol::Memory::Copy(data, newBuf, (int)size);
+            Oryol::Memory::Copy(data, newBuf+offset, (int)size);
         }
         if (data) {
             Oryol::Memory::Free(data);
         }
         data = newBuf;
         size = newCapacity;
-    }
-
-    inline void Block::allocAdd(uint64_t sizeAdd)
-    {
-        alloc(Size() + sizeAdd);
-    }
-
-    inline void Block::allocSubtract(uint64_t sizeRemove)
-    {
-        if (sizeRemove > Size())
-            sizeRemove = Size();
-        o_assert_dbg(sizeRemove <= Size());
-        if (!(Size() - sizeRemove)) {
-            return Clear();
-        }
-
-        uint8_t* newBuf = (uint8_t*)Oryol::Memory::Alloc((int)(Size()-sizeRemove));
-        if (size > 0) {
-            o_assert_dbg(data);
-            Oryol::Memory::Copy(data, newBuf, (int)(Size() - sizeRemove));
-        }
-        if (data) {
-            Oryol::Memory::Free(data);
-        }
-        data = newBuf;
-        size -= sizeRemove;
-    }
+    }   
 
     inline void Block::allocRemove(uint64_t offset, uint64_t sizeRemove)
     {
@@ -137,8 +109,7 @@ namespace ContainersPP {
     }
 
     //------------------------------------------------------------------------------
-    inline void
-        Block::destroy() {
+    inline void Block::destroy() {
         if (data) {
             Oryol::Memory::Free(data);
         }
@@ -166,10 +137,16 @@ namespace ContainersPP {
     }
 
     //------------------------------------------------------------------------------
-    inline uint8_t* Block::Add(uint64_t numBytes) {
+    inline uint8_t* Block::AddBack(uint64_t numBytes) {
         uint64_t oldSize = Size();
-        allocAdd(numBytes);
+        alloc(Size() + numBytes);
         return Data(oldSize);
+    }
+
+    inline uint8_t* Block::AddFront(uint64_t numBytes)
+    {
+        alloc(Size()+numBytes, numBytes);
+        return Data();
     }
 
     //------------------------------------------------------------------------------

@@ -3,13 +3,13 @@ fips_begin_module(ContainersPP)
 	
     fips_dir(Containers)
     fips_files(
-        #Array.h        
-		#ArrayMap.h
-        #Slice.h
         BlockStatic.h
 		Block.h
         Buffer.h
-		BufferStatic.h
+        BufferDbl.h
+        #Array.h        
+		#ArrayMap.h
+        #Slice.h        
         #HashSet.h
         #KeyValuePair.h
         #Map.h
@@ -20,7 +20,6 @@ fips_begin_module(ContainersPP)
         #InlineArray.h
 		#Trie.h
 		#Allocator.h
-		#BufferBlock.h
     )
 
     fips_dir(Interfaces)
