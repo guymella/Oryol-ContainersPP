@@ -28,7 +28,7 @@ bool BufferTest() {
     CHECK(buf0.SpareBack() == 12);
 
     static const uint8_t bla[] = { 1, 2, 3, 4, 5, 6, 7 };
-    buf0.AddBack(bla, sizeof(bla));
+    buf0.CopyBack(bla, sizeof(bla));
     CHECK(buf0.Size() == 7);
     CHECK(!buf0.Empty());
     CHECK(buf0.Capacity() == 12);
@@ -37,7 +37,7 @@ bool BufferTest() {
         CHECK(i+1 == buf0.Data()[i]);
     }
 
-    buf0.AddBack(bla, sizeof(bla));
+    buf0.CopyBack(bla, sizeof(bla));
     CHECK(buf0.Size() == 14);
     CHECK(!buf0.Empty());
     CHECK(buf0.Capacity() == 14);
@@ -93,7 +93,7 @@ bool BufferTest() {
 
     BUFFER buf3;
     const char* str = "Hello wonderful world!";
-    buf3.AddBack((const uint8_t*)str, int(std::strlen(str))+1);
+    buf3.CopyBack((const uint8_t*)str, int(std::strlen(str))+1);
     CHECK(0 == buf3.Remove(0, 0));
     CHECK(std::strcmp((const char*)buf3.Data(), str) == 0);
     CHECK(buf3.Size() == 23);
@@ -105,14 +105,14 @@ bool BufferTest() {
     CHECK(buf3.Size() == 13);
     CHECK(3 == buf3.Remove(10, 5));
     CHECK(buf3.Size() == 10);
-    buf3.AddBack((const uint8_t*)"\0", 1);
+    buf3.CopyBack((const uint8_t*)"\0", 1);
     CHECK(std::strcmp((const char*)buf3.Data(), "Hello worl") == 0);
     CHECK(6 == buf3.Remove(0, 6));
     CHECK(buf3.Size() == 5);
     CHECK(std::strcmp((const char*)buf3.Data(), "worl") == 0);
 
     BUFFER buf4;
-    buf4.AddBack((const uint8_t*)str, int(std::strlen(str))+1);
+    buf4.CopyBack((const uint8_t*)str, int(std::strlen(str))+1);
     CHECK(6 == buf4.Remove(0, 6));
     CHECK(std::strcmp((const char*)buf4.Data(), "wonderful world!") == 0);
     return true;

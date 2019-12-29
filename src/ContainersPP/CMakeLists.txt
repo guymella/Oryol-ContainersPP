@@ -7,6 +7,7 @@ fips_begin_module(ContainersPP)
 		Block.h
         Buffer.h
         BufferDbl.h
+		TypeBuffer.h
         #Array.h        
 		#ArrayMap.h
         #Slice.h        
@@ -27,6 +28,7 @@ fips_begin_module(ContainersPP)
         iArray.h iArray.cpp
         iBlock.h
 		iBuffer.h
+		iTypeBuffer.h
     )
 	
     fips_dir(Types)

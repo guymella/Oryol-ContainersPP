@@ -47,6 +47,8 @@ namespace ContainersPP {
 
         /// add uninitialized bytes to Block, return pointer to start
         virtual uint8_t* AddBack(uint64_t numBytes) override = 0;
+        /// add uninitialized bytes to Block, return pointer to start
+        virtual uint8_t* AddFront(uint64_t numBytes) override = 0;
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) override = 0;
         /// clear the Block (deletes content, keeps capacity)
@@ -78,6 +80,8 @@ namespace ContainersPP {
 
         /// add uninitialized bytes to Block, return pointer to start
         virtual uint8_t* AddBack(uint64_t numBytes) override = 0;
+        /// add uninitialized bytes to Block, return pointer to start
+        virtual uint8_t* AddFront(uint64_t numBytes) override = 0;
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) override = 0;
         /// clear the Block (deletes content, keeps capacity)

@@ -27,10 +27,10 @@ namespace ContainersPP {
         
         /// get number of bytes in Block
         virtual uint64_t Size() const override;  
-        using iBlockD::AddBack;
+        using iBlockD::CopyBack;
         /// add uninitialized bytes to Block, return pointer to start
         virtual uint8_t* AddBack(uint64_t numBytes) override;
-        using iBlockD::AddFront;
+        using iBlockD::CopyFront;
         /// add uninitialized bytes to front of Block, return pointer to start
         virtual uint8_t* AddFront(uint64_t numBytes) override;
         /// remove a chunk of data from the Block, return number of bytes removed

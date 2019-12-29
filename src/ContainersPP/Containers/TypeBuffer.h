@@ -1,0 +1,76 @@
+#pragma once
+//------------------------------------------------------------------------------
+/**
+    @class Oryol::BufferDbl
+    @ingroup Core
+    @brief growable memory buffer for raw data
+*/
+#include "ContainersPP/Containers/BufferDbl.h"
+#include "ContainersPP/Containers/Buffer.h"
+#include "ContainersPP/Containers/Block.h"
+#include "ContainersPP/Interfaces/iTypeBuffer.h"
+
+namespace ContainersPP {
+
+    template <typename TYPE>
+    class TypeBlock : public iTypeBlock<TYPE> {
+    protected:
+        virtual iBlockD& Buffer() override;
+        virtual const iBlockD& Buffer() const override;
+    private:
+        Block buffer;
+    };
+
+    template <typename TYPE>
+    class TypeVector : public iTypeVector<TYPE> {
+    protected:
+        virtual iBuffer& Buffer() override;
+        virtual const iBuffer& Buffer() const override;
+    private:
+        ContainersPP::Buffer buffer;
+    };
+
+template <typename TYPE>
+class TypeBuffer : public iTypeBuffer<TYPE>{
+protected:
+    virtual iBufferDbl& Buffer() override;
+    virtual const iBufferDbl& Buffer() const override;
+private:
+    BufferDbl buffer;
+};
+
+
+
+
+template<typename TYPE>
+inline const iBlockD& TypeBlock<TYPE>::Buffer() const {
+    return buffer;
+}
+template<typename TYPE>
+inline iBlockD& TypeBlock<TYPE>::Buffer() {
+    return buffer;
+}
+
+
+
+template<typename TYPE>
+inline const iBuffer& TypeVector<TYPE>::Buffer() const {
+    return buffer;
+}
+template<typename TYPE>
+inline iBuffer& TypeVector<TYPE>::Buffer() {
+    return buffer;
+}
+
+
+
+template<typename TYPE>
+inline iBufferDbl& TypeBuffer<TYPE>::Buffer() {
+    return buffer;
+}
+template<typename TYPE>
+inline const iBufferDbl& TypeBuffer<TYPE>::Buffer() const {
+    return buffer;
+}
+
+} // namespace 
