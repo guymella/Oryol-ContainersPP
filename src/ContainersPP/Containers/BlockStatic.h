@@ -13,7 +13,7 @@
 namespace ContainersPP {
 
     template <uint64_t SIZE>
-    class BlockStatic : public iBlock {
+    class BlockStatic : public iBlockS {
     public:
         /// default constructor
         BlockStatic() {};

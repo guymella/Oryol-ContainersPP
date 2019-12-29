@@ -29,7 +29,7 @@ namespace ContainersPP {
         virtual void ReserveBack(uint64_t numBytes) = 0;
     };
 
-    class iBuffer : public iBlockD, public iBufferBack {
+    class iBufferV : public iBlockD, public iBufferBack { //single ended buffer interface (vector)
     public:
         /// get capacity in bytes of buffer
         virtual uint64_t Capacity() const = 0;
@@ -57,7 +57,7 @@ namespace ContainersPP {
         
     };   
 
-    class iBufferDbl : public iBuffer, public iBufferFront {
+    class iBufferD : public iBufferV, public iBufferFront { //double endded buffer interface (Buffer)
     public:
         /// get capacity in bytes of buffer
         virtual uint64_t Capacity() const = 0;
@@ -88,7 +88,7 @@ namespace ContainersPP {
         virtual void Clear() = 0;
     };
     
-    uint64_t ContainersPP::iBuffer::SpareBack() const
+    uint64_t ContainersPP::iBufferV::SpareBack() const
     {
         return Capacity() - Size();
     }

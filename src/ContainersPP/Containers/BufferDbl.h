@@ -12,7 +12,7 @@
 
 namespace ContainersPP {
 
-class BufferDbl : public iBufferDbl{
+class BufferDbl : public iBufferD{
 public:
     /// default constructor
     BufferDbl(); 

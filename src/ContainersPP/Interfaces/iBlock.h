@@ -11,11 +11,11 @@
 
 
 namespace ContainersPP {
-
-    class iBlock {
+    
+    class iBlockS { //static block interface
     public:
         /// CopyAssign
-        virtual void operator=(const iBlock& rhs);
+        virtual void operator=(const iBlockS& rhs);
 
         /// get number of bytes in buffer
         virtual uint64_t Size() const = 0;
@@ -31,7 +31,7 @@ namespace ContainersPP {
         virtual void copy(const uint8_t* ptr, uint64_t numBytes, uint64_t offset = 0);
     };
 
-    class iBlockD : public iBlock {
+    class iBlockD : public iBlockS { //Dynamic block interface
     public:
 
         /// get number of bytes in buffer
@@ -40,7 +40,7 @@ namespace ContainersPP {
         virtual const uint8_t* Data(uint64_t offset = 0) const override = 0;
         /// get read/write pointer to content (throws assert if would return nullptr)
         virtual uint8_t* Data(uint64_t offset = 0) override = 0;
-
+         
         /// add bytes to Block
         virtual void CopyBack(const uint8_t* data, uint64_t numBytes);
         /// add uninitialized bytes to Block, return pointer to start
@@ -60,13 +60,13 @@ namespace ContainersPP {
     };
 
    
-    inline void iBlock::operator=(const iBlock& rhs)
+    inline void iBlockS::operator=(const iBlockS& rhs)
     {
         copy(rhs.Data(), rhs.Size());
     }
     
     //------------------------------------------------------------------------------
-    inline void iBlock::copy(const uint8_t* ptr, uint64_t numBytes, uint64_t offset) {
+    inline void iBlockS::copy(const uint8_t* ptr, uint64_t numBytes, uint64_t offset) {
         // NOTE: it is valid to call copy with numBytes==0
         o_assert_dbg(Data());
         if (numBytes > Size() - offset)
@@ -75,7 +75,7 @@ namespace ContainersPP {
     }
 
     //------------------------------------------------------------------------------
-    inline bool iBlock::Empty() const {
+    inline bool iBlockS::Empty() const {
         return !Size();
     }    
 

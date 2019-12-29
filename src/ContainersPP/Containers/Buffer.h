@@ -12,7 +12,7 @@
 
 namespace ContainersPP {
 
-class Buffer : public iBuffer{
+class Buffer : public iBufferV{
 public:
     /// default constructor
     Buffer(); 

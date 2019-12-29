@@ -24,8 +24,8 @@ namespace ContainersPP {
     template <typename TYPE>
     class TypeVector : public iTypeVector<TYPE> {
     protected:
-        virtual iBuffer& Buffer() override;
-        virtual const iBuffer& Buffer() const override;
+        virtual iBufferV& Buffer() override;
+        virtual const iBufferV& Buffer() const override;
     private:
         ContainersPP::Buffer buffer;
     };
@@ -33,8 +33,8 @@ namespace ContainersPP {
 template <typename TYPE>
 class TypeBuffer : public iTypeBuffer<TYPE>{
 protected:
-    virtual iBufferDbl& Buffer() override;
-    virtual const iBufferDbl& Buffer() const override;
+    virtual iBufferD& Buffer() override;
+    virtual const iBufferD& Buffer() const override;
 private:
     BufferDbl buffer;
 };
@@ -54,22 +54,22 @@ inline iBlockD& TypeBlock<TYPE>::Buffer() {
 
 
 template<typename TYPE>
-inline const iBuffer& TypeVector<TYPE>::Buffer() const {
+inline const iBufferV& TypeVector<TYPE>::Buffer() const {
     return buffer;
 }
 template<typename TYPE>
-inline iBuffer& TypeVector<TYPE>::Buffer() {
+inline iBufferV& TypeVector<TYPE>::Buffer() {
     return buffer;
 }
 
 
 
 template<typename TYPE>
-inline iBufferDbl& TypeBuffer<TYPE>::Buffer() {
+inline iBufferD& TypeBuffer<TYPE>::Buffer() {
     return buffer;
 }
 template<typename TYPE>
-inline const iBufferDbl& TypeBuffer<TYPE>::Buffer() const {
+inline const iBufferD& TypeBuffer<TYPE>::Buffer() const {
     return buffer;
 }
 

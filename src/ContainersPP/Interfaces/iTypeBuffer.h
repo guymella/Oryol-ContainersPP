@@ -54,8 +54,8 @@ namespace ContainersPP {
         /// make room for N more bytes
         virtual void ReserveBack(uint64_t numElements); 
     protected:
-        virtual iBuffer& Buffer() override = 0;
-        virtual const iBuffer& Buffer() const override = 0;
+        virtual iBufferV& Buffer() override = 0;
+        virtual const iBufferV& Buffer() const override = 0;
     };
 
     class iSizeBuffer : public iSizeVector {
@@ -65,12 +65,24 @@ namespace ContainersPP {
         /// make room for N more bytes at front
         virtual void ReserveFront(uint64_t numElements); 
     protected:
-        virtual iBufferDbl& Buffer() override = 0;
-        virtual const iBufferDbl& Buffer() const override = 0;
+        virtual iBufferD& Buffer() override = 0;
+        virtual const iBufferD& Buffer() const override = 0;
     };
 
     template<typename TYPE>
     class iTypeBlock : public iSizeBlock {
+        /// add uninitialized bytes to Block, return pointer to start
+        virtual uint8_t* AddBack(uint64_t numElements) override;
+        /// add uninitialized bytes to front of Block, return pointer to start
+        virtual uint8_t* AddFront(uint64_t numElements) override;
+        /// remove a chunk of data from the Block, return number of bytes removed
+        virtual uint64_t Remove(uint64_t offset, uint64_t numElements) override;
+        /// clear the Block (deletes content, keeps capacity)
+        virtual void Clear() override;
+        //c style iterator to front
+        virtual TYPE* begin(uint64_t offset = 0);
+        //c style iterator to front
+        virtual const TYPE* begin(uint64_t offset = 0) const;
     protected:
         virtual uint64_t UnitSize() const override;        
     };
@@ -176,6 +188,79 @@ namespace ContainersPP {
         Buffer().Clear();
         Buffer().AddBack(offset);
         Buffer().CopyBack(ptr, numBytes * UnitSize());
+    }
+
+    template<typename TYPE>
+    inline uint8_t* iTypeBlock<TYPE>::AddBack(uint64_t numElements)
+    {
+        uint8_t* rtn =  iSizeBlock::AddBack(numElements);
+        TYPE* bld = (TYPE*)rtn;
+        for (uint64_t i = 0; i < numElements, i++) {
+            new (bld) TYPE(); //construct elements
+            ++bld;
+        }
+        return rtn;
+    }
+
+    template<typename TYPE>
+    inline uint8_t* iTypeBlock<TYPE>::AddFront(uint64_t numElements)
+    {
+        uint8_t* rtn = iSizeBlock::AddFront(numElements);
+        TYPE* bld = (TYPE*)rtn;
+        for (uint64_t i = 0; i < numElements, i++) {
+            new (bld) TYPE(); //construct elements
+            ++bld;
+        }
+        return rtn;
+    }
+
+    template<typename TYPE>
+    inline uint64_t iTypeBlock<TYPE>::Remove(uint64_t offset, uint64_t numElements)
+    {
+        #ifdef DEFENSE
+            if (offset >= Size())
+                return 0;        
+            if (offset + numElements > Size())
+                numElements = Size() - offset;
+        #endif // DEFENSE
+        o_assert_dbg(offset < Size());
+        o_assert_dbg(offset + numElements <= Size());
+
+        //deconstruct elements
+        TYPE* dst = begin(offset);
+        for (uint64_t i = 0; i < numElements; i++) {
+            dst->~TYPE();
+            ++dst;
+        }
+        iSizeBlock::Remove(offset, numElements);
+
+        return numElements;
+    }
+
+    template<typename TYPE>
+    inline void iTypeBlock<TYPE>::Clear()
+    {
+        uint64_t s = Size();
+        if (s) {
+            TYPE* dst = begin();
+            for (uint64_t i = 0; i < s; i++) {
+                dst->~TYPE();
+                ++dst;
+            }
+        }
+        iSizeBlock::Clear();
+    }
+
+    template<typename TYPE>
+    inline TYPE* iTypeBlock<TYPE>::begin(uint64_t offset)
+    {
+        return ((TYPE*)Data()) + offset;
+    }
+
+    template<typename TYPE>
+    inline const TYPE* iTypeBlock<TYPE>::begin(uint64_t offset) const
+    {
+        return ((TYPE*)Data()) + offset;
     }
 
     template<typename TYPE>
