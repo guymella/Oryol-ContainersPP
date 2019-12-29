@@ -9,7 +9,12 @@
 
 	class iArray{
 	public:
-		iArray() {};
+		iArray();
 
 				
 	};
+
+	iArray::iArray()
+	{
+		int x = 1;
+	}

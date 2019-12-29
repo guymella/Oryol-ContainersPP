@@ -5,52 +5,49 @@
     @ingroup Core
     @brief growable memory buffer for raw data
 */
-#include "Core/Types.h"
+#include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
+#include "ContainersPP/Interfaces/iBuffer.h"
 
-namespace Oryol {
+namespace ContainersPP {
 
-class Buffer {
+class Buffer : public iBuffer{
 public:
     /// default constructor
-    Buffer();
+    Buffer(); 
+    /// Copy-construct
+    Buffer(const Buffer& rhs);
     /// move constructor
     Buffer(Buffer&& rhs);
     /// destructor
     ~Buffer();
 
-    /// always force move-construct
-    Buffer(const Buffer& rhs) = delete;
-    /// always force move-assign
-    void operator=(const Buffer& rhs) = delete;
+   
 
     /// move-assignment
     void operator=(Buffer&& rhs);
+    /// get capacity in bytes of buffer
+    virtual uint64_t Capacity() const override;
+    /// get number of free bytes at back
+    virtual uint64_t SpareBack() const override;
+    /// make room for N more bytes
+    virtual void ReserveBack(uint64_t numBytes) override;
 
     /// get number of bytes in buffer
-    int Size() const;
-    /// return true if empty
-    bool Empty() const;
-    /// get capacity in bytes of buffer
-    int Capacity() const;
-    /// get number of free bytes at back
-    int Spare() const;
-
-    /// make room for N more bytes
-    void Reserve(int numBytes);
-    /// add bytes to buffer
-    void Add(const uint8_t* data, int numBytes);
-    /// add uninitialized bytes to buffer, return pointer to start
-    uint8_t* Add(int numBytes);
-    /// remove a chunk of data from the buffer, return number of bytes removed
-    int Remove(int offset, int numBytes);
-    /// clear the buffer (deletes content, keeps capacity)
-    void Clear();
+    virtual uint64_t Size() const override;
     /// get read-only pointer to content (throws assert if would return nullptr)
-    const uint8_t* Data() const;
+    virtual const uint8_t* Data(uint64_t offset = 0) const override;
     /// get read/write pointer to content (throws assert if would return nullptr)
-    uint8_t* Data();
+    virtual uint8_t* Data(uint64_t offset = 0) override;
+
+    using iBlockD::Add;
+    /// add uninitialized bytes to Block, return pointer to start
+    virtual uint8_t* Add(uint64_t numBytes) override;
+    /// remove a chunk of data from the Block, return number of bytes removed
+    virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) override;
+    /// clear the Block (deletes content, keeps capacity)
+    virtual void Clear() override;
 
 private:
     /// (re-)allocate buffer
@@ -60,8 +57,8 @@ private:
     /// append-copy content into currently allocated buffer, bump size
     void copy(const uint8_t* ptr, int numBytes);
 
-    int size;
-    int capacity;
+    uint64_t size;
+    uint64_t capacity;
     uint8_t* data;
 };
 
@@ -88,22 +85,22 @@ data(rhs.data) {
 //------------------------------------------------------------------------------
 inline
 Buffer::~Buffer() {
-    this->destroy();
+    destroy();
 }
 
 //------------------------------------------------------------------------------
 inline void
 Buffer::alloc(int newCapacity) {
-    o_assert_dbg(newCapacity > this->capacity);
-    o_assert_dbg(newCapacity > this->size);
+    o_assert_dbg(newCapacity > capacity);
+    o_assert_dbg(newCapacity > size);
 
-    uint8_t* newBuf = (uint8_t*) Memory::Alloc(newCapacity);
-    if (this->size > 0) {
-        o_assert_dbg(this->data);
-        Memory::Copy(this->data, newBuf, this->size);
+    uint8_t* newBuf = (uint8_t*) Oryol::Memory::Alloc((int)newCapacity);
+    if (size > 0) {
+        o_assert_dbg(data);
+        Oryol::Memory::Copy(data, newBuf, (int)size);
     }
-    if (this->data) {
-        Memory::Free(this->data);
+    if (data) {
+        Oryol::Memory::Free(data);
     }
     this->data = newBuf;
     this->capacity = newCapacity;
@@ -112,128 +109,112 @@ Buffer::alloc(int newCapacity) {
 //------------------------------------------------------------------------------
 inline void
 Buffer::destroy() {
-    if (this->data) {
-        Memory::Free(this->data);
+    if (data) {
+        Oryol::Memory::Free(data);
     }
-    this->data = nullptr;
-    this->size = 0;
-    this->capacity = 0;
+    data = nullptr;
+    size = 0;
+    capacity = 0;
 }
 
 //------------------------------------------------------------------------------
-inline void
-Buffer::copy(const uint8_t* ptr, int numBytes) {
-    // NOTE: it is valid to call copy with numBytes==0
-    o_assert_dbg(this->data);
-    o_assert_dbg((this->size + numBytes) <= this->capacity);
-    Memory::Copy(ptr, this->data + this->size, numBytes);
-    this->size += numBytes;
-}
+//inline void
+//Buffer::copy(const uint8_t* ptr, int numBytes) {
+//    // NOTE: it is valid to call copy with numBytes==0
+//    o_assert_dbg(data);
+//    o_assert_dbg((this->size + numBytes) <= capacity);
+//    Oryol::Memory::Copy(ptr, this->data + this->size, numBytes);
+//    this->size += numBytes;
+//}
 
 //------------------------------------------------------------------------------
-inline void
-Buffer::operator=(Buffer&& rhs) {
-    this->destroy();
-    this->size = rhs.size;
-    this->capacity = rhs.capacity;
-    this->data = rhs.data;
+inline void Buffer::operator=(Buffer&& rhs) {
+    destroy();
+    size = rhs.size;
+    capacity = rhs.capacity;
+    data = rhs.data;
     rhs.size = 0;
     rhs.capacity = 0;
     rhs.data = nullptr;
 }
 
 //------------------------------------------------------------------------------
-inline int
-Buffer::Size() const {
-    return this->size;
+inline uint64_t Buffer::Size() const {
+    return size;
+}
+//------------------------------------------------------------------------------
+inline uint64_t Buffer::Capacity() const {
+    return capacity;
 }
 
 //------------------------------------------------------------------------------
-inline bool
-Buffer::Empty() const {
-    return 0 == this->size;
+inline uint64_t Buffer::SpareBack() const {
+    return capacity - size;
 }
 
 //------------------------------------------------------------------------------
-inline int
-Buffer::Capacity() const {
-    return this->capacity;
-}
-
-//------------------------------------------------------------------------------
-inline int
-Buffer::Spare() const {
-    return this->capacity - this->size;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::Reserve(int numBytes) {
+inline void Buffer::ReserveBack(uint64_t numBytes) {
     // need to grow?
-    if ((this->size + numBytes) > this->capacity) {
-        const int newCapacity = this->size + numBytes;
-        this->alloc(newCapacity);
+    if ((size + numBytes) > capacity) {
+        const uint64_t newCapacity = size + numBytes;
+        alloc((int)newCapacity);
     }
 }
 
-//------------------------------------------------------------------------------
-inline void
-Buffer::Add(const uint8_t* data, int numBytes) {
-    this->Reserve(numBytes);
-    this->copy(data, numBytes);
-}
+////------------------------------------------------------------------------------
+//inline void Buffer::Add(const uint8_t* data, uint64_t numBytes) {
+//    this->Reserve(numBytes);
+//    this->copy(data, numBytes);
+//}
 
 //------------------------------------------------------------------------------
-inline uint8_t*
-Buffer::Add(int numBytes) {
-    this->Reserve(numBytes);
-    uint8_t* ptr = this->data + this->size;
-    this->size += numBytes;
+inline uint8_t* Buffer::Add(uint64_t numBytes) {
+    ReserveBack(numBytes);
+    uint8_t* ptr = data + size;
+    size += numBytes;
     return ptr;
 }
 
 //------------------------------------------------------------------------------
 inline void
 Buffer::Clear() {
-    this->size = 0;
+    size = 0;
 }
 
 //------------------------------------------------------------------------------
-inline int
-Buffer::Remove(int offset, int numBytes) {
+inline uint64_t Buffer::Remove(uint64_t offset, uint64_t numBytes) {
     o_assert_dbg(offset >= 0);
     o_assert_dbg(numBytes >= 0);
-    if (offset >= this->size) {
+    if (offset >= size) {
         return 0;
     }
-    if ((offset + numBytes) >= this->size) {
-        numBytes = this->size - offset;
+    if ((offset + numBytes) >= size) {
+        numBytes = size - offset;
     }
-    o_assert_dbg((offset + numBytes) <= this->size);
+    o_assert_dbg((offset + numBytes) <= size);
     o_assert_dbg(numBytes >= 0);
     if (numBytes > 0) {
-        int bytesToMove = this->size - (offset + numBytes);
+        uint64_t bytesToMove = size - (offset + numBytes);
         if (bytesToMove > 0) {
-            Memory::Move(this->data + offset + numBytes, this->data + offset, bytesToMove);
+            Oryol::Memory::Move(data + offset + numBytes, data + offset, (int)bytesToMove);
         }
-        this->size -= numBytes;
-        o_assert_dbg(this->size >= 0);
+        size -= numBytes;
+        o_assert_dbg(size >= 0);
     }
     return numBytes;
 }
 
 //------------------------------------------------------------------------------
-inline const uint8_t*
-Buffer::Data() const {
-    o_assert(this->data);
-    return this->data;
+inline const uint8_t* Buffer::Data(uint64_t offset) const {
+    o_assert(data);
+    return data+offset;
 }
 
 //------------------------------------------------------------------------------
 inline uint8_t*
-Buffer::Data() {
-    o_assert(this->data);
-    return this->data;
+Buffer::Data(uint64_t offset) {
+    o_assert(data);
+    return data + offset;
 }
 
 } // namespace Oryol

@@ -1,3 +1,4 @@
+#include "iArray.h"
 #pragma once
 //------------------------------------------------------------------------------
 /**
@@ -6,10 +7,3 @@
     @brief interface for Procedural Memory inline Array
 */
 
-
-	class iArray{
-	public:
-		iArray() {};
-
-				
-	};

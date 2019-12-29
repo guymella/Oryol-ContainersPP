@@ -1,7 +1,7 @@
 #pragma once
 //------------------------------------------------------------------------------
 /*
-    @class Oryol::_priv::elementBuffer
+    @class ContainersPP::_priv::BufferBlock
     @ingroup _priv
  
     Low-level dynamic memory buffer that is used as base for most
@@ -19,6 +19,7 @@
     '----' - empty memory slot (guaranteed to be destructed)
     'XXXX' - valid element (guaranteed to be constructed)
 */
+
 #include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
@@ -27,22 +28,23 @@
 namespace ContainersPP {
 namespace _priv {
 
-template<class TYPE> class elementBuffer {
+template<class TYPE, uint64 SIZE> 
+class BufferBlock {
 public:
     /// default constructor
-    elementBuffer();
+    BufferBlock();
     /// copy constructor
-    elementBuffer(const elementBuffer& rhs);
+    BufferBlock(const BufferBlock& rhs);
     /// move constructor
-    elementBuffer(elementBuffer&& rhs);
+    BufferBlock(BufferBlock&& rhs);
     /// destructor
-    ~elementBuffer();
-    
+    ~BufferBlock();
+
     /// copy-assignment operator
-    void operator=(const elementBuffer& rhs);
+    void operator=(const BufferBlock& rhs);
     /// move-assignment operator
-    void operator=(elementBuffer&& rhs);
-    
+    void operator=(BufferBlock&& rhs);
+
     /// get number of free slots at front
     int frontSpare() const;
     /// get number of free slots at back
@@ -53,7 +55,7 @@ public:
     int size() const;
     /// get overall capacity
     int capacity() const;
-    
+
     /// access element by index
     TYPE& operator[](int index);
     /// read-access element by index
@@ -66,8 +68,8 @@ public:
     TYPE& back();
     /// get back element (r/o)
     const TYPE& back() const;
-    
-    /// allocate, grow or shrink the elementBuffer
+
+    /// allocate, grow or shrink the BufferBlock
     void alloc(int capacity, int frontSpare);
     /// destroy all
     void destroy();
@@ -75,14 +77,14 @@ public:
     static void destroyElement(TYPE* ptr);
     /// clear content
     void clear();
-    
+
     /// test if to pointer is within [from, from+num]
     static bool overlaps(const TYPE* from, const TYPE* to, int num);
     /// copy-construct element range
     static void copyConstruct(const TYPE* from, TYPE* to, int num);
     /// copy-assign element range UNTESTED
     static void copyAssign(const TYPE* from, TYPE* to, int num);
-    
+
     /// push element at back (backSpare must be > 0!)
     void pushBack(const TYPE& elm);
     /// move element to back (backSpare must be > 0!)
@@ -100,7 +102,7 @@ public:
     template<class... ARGS> void emplaceFront(ARGS&&... args);
     /// pop front element
     TYPE popFront();
-    
+
     /// prepare insertion by making room and returning pointer to insert to
     TYPE* prepareInsert(int index, bool& outSlotConstructed);
     /// copy-insert element at position, keep other elements in their previous order
@@ -118,7 +120,7 @@ public:
     void eraseSwapFront(int index);
     /// erase a range of elements
     void eraseRange(int index, int num);
-    
+
     /// move elements towards front for insertion, return pointer to free insertion slot
     TYPE* moveInsertFront(int index);
     /// move elements towards end for insertion, return pointer to free insertion slot
@@ -137,16 +139,15 @@ public:
     /// C++ end
     const TYPE* _end() const;
 
-    TYPE* buf;          // buffer start;
+    TYPE buf[SIZE];          // buffer start;
     int cap;            // buffer capacity (num elements)
     int start;          // index of first valid element in buffer
     int end;            // index of one-past-last valid element in buffer
 };
 
 //------------------------------------------------------------------------------
-template<class TYPE>
-elementBuffer<TYPE>::elementBuffer() :
-buf(nullptr),
+template<class TYPE, uint64 SIZE>
+BufferBlock<TYPE, SIZE>::BufferBlock() : 
 cap(0),
 start(0),
 end(0)
@@ -155,14 +156,13 @@ end(0)
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE>
-elementBuffer<TYPE>::elementBuffer(const elementBuffer& rhs) :
-buf(nullptr),
+template<class TYPE, uint64 SIZE>
+BufferBlock<TYPE, SIZE>::BufferBlock(const BufferBlock& rhs) :
 cap(0),
 start(0),
 end(0)
 {
-    if (rhs.buf) {
+    if (rhs.Size()) {
         this->alloc(rhs.size(), 0);
         o_assert_range_dbg(rhs.start, rhs.cap);
         o_assert_dbg((rhs.start + rhs.size()) <= rhs.cap);
@@ -175,8 +175,8 @@ end(0)
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE>
-elementBuffer<TYPE>::elementBuffer(elementBuffer&& rhs) :
+template<class TYPE, uint64 SIZE> 
+BufferBlock<TYPE, SIZE>::BufferBlock(BufferBlock&& rhs) :
 buf(rhs.buf),
 cap(rhs.cap),
 start(rhs.start),
@@ -190,14 +190,14 @@ end(rhs.end)
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE>
-elementBuffer<TYPE>::~elementBuffer() {
+template<class TYPE, uint64 SIZE> 
+BufferBlock<TYPE, SIZE>::~BufferBlock() {
     this->destroy();
 }
     
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::operator=(const elementBuffer<TYPE>& rhs) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::operator=(const BufferBlock<TYPE, SIZE>& rhs) {
     if (&rhs != this) {
         this->destroy();
         const int newSize = rhs.size();
@@ -216,8 +216,8 @@ elementBuffer<TYPE>::operator=(const elementBuffer<TYPE>& rhs) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::operator=(elementBuffer<TYPE>&& rhs) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::operator=(BufferBlock<TYPE, SIZE>&& rhs) {
     if (&rhs != this) {
         this->destroy();
         this->buf   = rhs.buf;
@@ -232,38 +232,38 @@ elementBuffer<TYPE>::operator=(elementBuffer<TYPE>&& rhs) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> int
-elementBuffer<TYPE>::frontSpare() const {
+template<class TYPE, uint64 SIZE>  int
+BufferBlock<TYPE, SIZE>::frontSpare() const {
     return this->start;
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> int
-elementBuffer<TYPE>::backSpare() const {
+template<class TYPE, uint64 SIZE>  int
+BufferBlock<TYPE, SIZE>::backSpare() const {
     return this->cap - this->end;
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> int
-elementBuffer<TYPE>::spare() const {
+template<class TYPE, uint64 SIZE>  int
+BufferBlock<TYPE, SIZE>::spare() const {
     return this->cap - this->size();
 }
     
 //------------------------------------------------------------------------------
-template<class TYPE> int
-elementBuffer<TYPE>::size() const {
+template<class TYPE, uint64 SIZE>  int
+BufferBlock<TYPE, SIZE>::size() const {
     return this->end-this->start;
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> int
-elementBuffer<TYPE>::capacity() const {
+template<class TYPE, uint64 SIZE>  int
+BufferBlock<TYPE, SIZE>::capacity() const {
     return this->cap;
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE&
-elementBuffer<TYPE>::operator[](int index) {
+template<class TYPE, uint64 SIZE>  TYPE&
+BufferBlock<TYPE, SIZE>::operator[](int index) {
     o_assert_dbg((index >= 0) && (index < this->size()));
     o_assert_dbg(this->buf);
     o_assert_range_dbg(this->start+index, this->cap);
@@ -271,8 +271,8 @@ elementBuffer<TYPE>::operator[](int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> const TYPE&
-elementBuffer<TYPE>::operator[](int index) const {
+template<class TYPE, uint64 SIZE>  const TYPE&
+BufferBlock<TYPE, SIZE>::operator[](int index) const {
     o_assert_dbg((index >= 0) && (index < this->size()));
     o_assert_dbg(this->buf);
     o_assert_range_dbg(this->start+index, this->cap);
@@ -280,40 +280,40 @@ elementBuffer<TYPE>::operator[](int index) const {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE&
-elementBuffer<TYPE>::front() {
+template<class TYPE, uint64 SIZE>  TYPE&
+BufferBlock<TYPE, SIZE>::front() {
     o_assert((this->start != this->end) && this->buf);
     o_assert_range_dbg(this->start, this->cap);
     return this->buf[this->start];
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> const TYPE&
-elementBuffer<TYPE>::front() const {
+template<class TYPE, uint64 SIZE>  const TYPE&
+BufferBlock<TYPE, SIZE>::front() const {
     o_assert((this->start != this->end) && this->buf);
     o_assert_range_dbg(this->start, this->cap);
     return this->buf[this->start];
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE&
-elementBuffer<TYPE>::back() {
+template<class TYPE, uint64 SIZE>  TYPE&
+BufferBlock<TYPE, SIZE>::back() {
     o_assert((this->start != this->end) && this->buf);
     o_assert_range_dbg(this->end-1, this->cap);
     return this->buf[this->end - 1];
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> const TYPE&
-elementBuffer<TYPE>::back() const {
+template<class TYPE, uint64 SIZE>  const TYPE&
+BufferBlock<TYPE, SIZE>::back() const {
     o_assert((this->start != this->end) && this->buf);
     o_assert_range_dbg(this->end-1, this->cap);
     return this->buf[this->end - 1];
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::alloc(int newCapacity, int newStart) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::alloc(int newCapacity, int newStart) {
     o_assert_dbg(newCapacity > 0);
     if (this->cap == newCapacity) {
         return;
@@ -353,8 +353,8 @@ elementBuffer<TYPE>::alloc(int newCapacity, int newStart) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::destroy() {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::destroy() {
     // destroy elements and free buffer
     if (this->buf) {
         for (int i = this->start; i < this->end; i++) {
@@ -370,14 +370,14 @@ elementBuffer<TYPE>::destroy() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::destroyElement(TYPE* elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::destroyElement(TYPE* elm) {
     elm->~TYPE();
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::clear() {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::clear() {
     if (this->buf) {
         for (int i = this->start; i < this->end; i++) {
             o_assert_range_dbg(i, this->cap);
@@ -388,14 +388,14 @@ elementBuffer<TYPE>::clear() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> bool
-elementBuffer<TYPE>::overlaps(const TYPE* from, const TYPE* to, int num) {
+template<class TYPE, uint64 SIZE>  bool
+BufferBlock<TYPE, SIZE>::overlaps(const TYPE* from, const TYPE* to, int num) {
     return (to >= from) && (to < (from + num));
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::copyConstruct(const TYPE* from, TYPE* to, int num) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::copyConstruct(const TYPE* from, TYPE* to, int num) {
     o_assert_dbg(!overlaps(from, to, num));
     for (int i = 0; i < num; i++) {
         new(to++) TYPE(*from++);
@@ -403,8 +403,8 @@ elementBuffer<TYPE>::copyConstruct(const TYPE* from, TYPE* to, int num) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::copyAssign(const TYPE* from, TYPE* to, int num) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::copyAssign(const TYPE* from, TYPE* to, int num) {
     o_assert_dbg(!overlaps(from, to, num));
     for (int i = 0; i < num; i++) {
         *to++ = *from++;
@@ -412,8 +412,8 @@ elementBuffer<TYPE>::copyAssign(const TYPE* from, TYPE* to, int num) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::pushBack(const TYPE& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::pushBack(const TYPE& elm) {
     // NOTE: this will fail if there is no spare space at the back,
     // use insert(size(), elm) which will move towards front if possible
     o_assert_dbg(this->buf);
@@ -422,8 +422,8 @@ elementBuffer<TYPE>::pushBack(const TYPE& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::pushBack(TYPE&& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::pushBack(TYPE&& elm) {
     // NOTE: this will fail if there is no spare space at the back,
     // use insert(size(), elm) which will move towards front if possible
     o_assert_dbg(this->buf);
@@ -432,8 +432,8 @@ elementBuffer<TYPE>::pushBack(TYPE&& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> template<class... ARGS> void
-elementBuffer<TYPE>::emplaceBack(ARGS&&... args) {
+template<class TYPE, uint64 SIZE>  template<class... ARGS> void
+BufferBlock<TYPE, SIZE>::emplaceBack(ARGS&&... args) {
     // NOTE: this will fail if there is no spare space at the back,
     // use insert(size(), elm) which will move towards front if possible
     o_assert_dbg(this->buf);
@@ -442,8 +442,8 @@ elementBuffer<TYPE>::emplaceBack(ARGS&&... args) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::pushFront(const TYPE& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::pushFront(const TYPE& elm) {
     // NOTE: this will fail if there is no spare space at the front,
     // use insert(0, elm) which will move towards back if possible
     o_assert_dbg(this->buf && (this->start > 0) && (this->start <= this->cap));
@@ -451,8 +451,8 @@ elementBuffer<TYPE>::pushFront(const TYPE& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::pushFront(TYPE&& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::pushFront(TYPE&& elm) {
     // NOTE: this will fail if there is no spare space at the front,
     // use insert(0, elm) which will move towards back if possible
     o_assert_dbg(this->buf && (this->start > 0) && (this->start <= this->cap));
@@ -460,8 +460,8 @@ elementBuffer<TYPE>::pushFront(TYPE&& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> template<class... ARGS> void
-elementBuffer<TYPE>::emplaceFront(ARGS&&... args) {
+template<class TYPE, uint64 SIZE>  template<class... ARGS> void
+BufferBlock<TYPE, SIZE>::emplaceFront(ARGS&&... args) {
     // NOTE: this will fail if there is no spare space at the front,
     // use insert(0, elm) which will move towards back if possible
     o_assert_dbg(this->buf && (this->start > 0) && (this->start <= this->cap));
@@ -469,8 +469,8 @@ elementBuffer<TYPE>::emplaceFront(ARGS&&... args) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE*
-elementBuffer<TYPE>::moveInsertFront(int index) {
+template<class TYPE, uint64 SIZE>  TYPE*
+BufferBlock<TYPE, SIZE>::moveInsertFront(int index) {
     // free a slot for insertion by moving the elements
     // at and before it towards the front
     // the freed slot will NOT be deconstructed!
@@ -489,8 +489,8 @@ elementBuffer<TYPE>::moveInsertFront(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE*
-elementBuffer<TYPE>::moveInsertBack(int index) {
+template<class TYPE, uint64 SIZE>  TYPE*
+BufferBlock<TYPE, SIZE>::moveInsertBack(int index) {
     // free a slot for insertion by moving the elements
     // after it towards the back
     // the freed slot will NOT be deconstructed!
@@ -509,8 +509,8 @@ elementBuffer<TYPE>::moveInsertBack(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::moveEraseFront(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::moveEraseFront(int index) {
     // erase a slot by moving elements from the front
     o_assert_dbg(this->buf && (index >= 0) && (index < this->size()));
     for (int i = this->start + index; i > this->start; i--) {
@@ -523,8 +523,8 @@ elementBuffer<TYPE>::moveEraseFront(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::moveEraseBack(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::moveEraseBack(int index) {
     // erase a slot by moving elements from the back
     o_assert_dbg(this->buf && (index >= 0) && (index < this->size()));
     for (int i = this->start + index; i < (this->end - 1); i++) {
@@ -537,8 +537,8 @@ elementBuffer<TYPE>::moveEraseBack(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE*
-elementBuffer<TYPE>::prepareInsert(int index, bool& outSlotConstructed) {
+template<class TYPE, uint64 SIZE>  TYPE*
+BufferBlock<TYPE, SIZE>::prepareInsert(int index, bool& outSlotConstructed) {
 
     // this method will return a pointer to an empty, destructed slot!
 
@@ -615,8 +615,8 @@ elementBuffer<TYPE>::prepareInsert(int index, bool& outSlotConstructed) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::insert(int index, const TYPE& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::insert(int index, const TYPE& elm) {
     bool slotConstructed = true;
     TYPE* ptr = this->prepareInsert(index, slotConstructed);
     if (slotConstructed) {
@@ -628,8 +628,8 @@ elementBuffer<TYPE>::insert(int index, const TYPE& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::insert(int index, TYPE&& elm) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::insert(int index, TYPE&& elm) {
     bool slotConstructed = true;
     TYPE* ptr = this->prepareInsert(index, slotConstructed);
     if (slotConstructed) {
@@ -641,8 +641,8 @@ elementBuffer<TYPE>::insert(int index, TYPE&& elm) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::erase(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::erase(int index) {
     const int size = this->size();
     o_assert_dbg(this->buf && (index >= 0) && (index < size));
     
@@ -670,8 +670,8 @@ elementBuffer<TYPE>::erase(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::eraseSwap(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::eraseSwap(int index) {
     const int size = this->size();
     o_assert_dbg(this->buf && (index >= 0) && (index < size));
     
@@ -705,8 +705,8 @@ elementBuffer<TYPE>::eraseSwap(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::eraseSwapBack(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::eraseSwapBack(int index) {
     const int size = this->size();
     o_assert_dbg(this->buf && (index >= 0) && (index < size));
     if (index == (size - 1)) {
@@ -724,8 +724,8 @@ elementBuffer<TYPE>::eraseSwapBack(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::eraseSwapFront(int index) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::eraseSwapFront(int index) {
     o_assert_dbg(this->buf && (index >= 0) && (index < this->size()));
     if (0 == index) {
         // special case: first element
@@ -742,8 +742,8 @@ elementBuffer<TYPE>::eraseSwapFront(int index) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> void
-elementBuffer<TYPE>::eraseRange(int index, int num) {
+template<class TYPE, uint64 SIZE>  void
+BufferBlock<TYPE, SIZE>::eraseRange(int index, int num) {
     //TODO:: use memMove to perform move, much faster.
     o_assert_dbg(this->buf && (index>=0) && ((index+num) <= this->size()) && (num >= 0));
     if (0 == num) {
@@ -764,8 +764,8 @@ elementBuffer<TYPE>::eraseRange(int index, int num) {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE
-elementBuffer<TYPE>::popBack() {
+template<class TYPE, uint64 SIZE>  TYPE
+BufferBlock<TYPE, SIZE>::popBack() {
     o_assert_dbg(this->buf && (this->end > this->start));
     o_assert_dbg((this->end > 0) && (this->end <= this->cap));
     TYPE val(std::move(this->buf[--this->end]));
@@ -774,8 +774,8 @@ elementBuffer<TYPE>::popBack() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE
-elementBuffer<TYPE>::popFront() {
+template<class TYPE, uint64 SIZE>  TYPE
+BufferBlock<TYPE, SIZE>::popFront() {
     o_assert_dbg(this->buf && (this->start < this->end));
     o_assert_range_dbg(this->start, this->cap);
     TYPE val(std::move(this->buf[this->start]));
@@ -784,8 +784,8 @@ elementBuffer<TYPE>::popFront() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE*
-elementBuffer<TYPE>::_begin() {
+template<class TYPE, uint64 SIZE>  TYPE*
+BufferBlock<TYPE, SIZE>::_begin() {
     if (this->buf) {
         // NOTE: the returned pointer may point to invalid memory!
         return &this->buf[this->start];
@@ -796,8 +796,8 @@ elementBuffer<TYPE>::_begin() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> const TYPE*
-elementBuffer<TYPE>::_begin() const {
+template<class TYPE, uint64 SIZE>  const TYPE*
+BufferBlock<TYPE, SIZE>::_begin() const {
     if (this->buf) {
         // NOTE: the returned pointer may point to invalid memory!
         return &this->buf[this->start];
@@ -808,8 +808,8 @@ elementBuffer<TYPE>::_begin() const {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> TYPE*
-elementBuffer<TYPE>::_end() {
+template<class TYPE, uint64 SIZE>  TYPE*
+BufferBlock<TYPE, SIZE>::_end() {
     if (this->buf) {
         // NOTE: the returned pointer may point to invalid memory!
         return &this->buf[this->end];
@@ -820,8 +820,8 @@ elementBuffer<TYPE>::_end() {
 }
 
 //------------------------------------------------------------------------------
-template<class TYPE> const TYPE*
-elementBuffer<TYPE>::_end() const {
+template<class TYPE, uint64 SIZE>  const TYPE*
+BufferBlock<TYPE, SIZE>::_end() const {
     if (this->buf) {
         // NOTE: the returned pointer may point to invalid memory!
         return &this->buf[this->end];

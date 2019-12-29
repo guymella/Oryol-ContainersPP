@@ -32,11 +32,11 @@
     @see ArrayMap, Map, Set, HashSet
 */
 #include "Core/Config.h"
-#include "Core/Containers/elementBuffer.h"
-#include "Core/Containers/Slice.h"
+#include "ContainersPP/Containers/elementBuffer.h"
+#include "ContainersPP/Containers/Slice.h"
 #include <initializer_list>
 
-namespace Oryol {
+namespace ContainersPP {
 
 template<class TYPE> class Array {
 public:

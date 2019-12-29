@@ -13,7 +13,7 @@
 #include "Core/Config.h"
 #include "Core/Assertion.h"
 
-namespace Oryol {
+namespace ContainersPP {
 
 template<typename TYPE> class Slice {
 public:
