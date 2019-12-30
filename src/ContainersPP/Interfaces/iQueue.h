@@ -49,7 +49,7 @@ public:
 	/// pop the first element
 	virtual TYPE PopFront() = 0;
 	/// Pop num Elements from Front of Array and return last element popped
-	//virtual TYPE PopFront(size_t numElements) = 0;
+	virtual TYPE PopFront(size_t numElements) = 0;
 };
 
 template <typename TYPE>
@@ -58,7 +58,7 @@ public:
 	/// pop the last element
 	virtual TYPE PopBack() = 0;
 	//remove num elements from back of array and return the last to be removed
-	//virtual TYPE PopBack(size_t numElements) = 0;
+	virtual TYPE PopBack(size_t numElements) = 0;
 };
 
 template <typename TYPE>

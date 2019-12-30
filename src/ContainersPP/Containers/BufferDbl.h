@@ -22,11 +22,15 @@ public:
     BufferDbl(BufferDbl&& rhs);
     /// destructor
     ~BufferDbl();
-
-   
-
+    
     /// move-assignment
     void operator=(BufferDbl&& rhs);
+
+    /// Force Allocate the buffer
+    virtual void Allocate(uint64_t newCapacity) override;
+    /// Force Allocate the buffer
+    virtual void Allocate(uint64_t newCapacity, uint64_t frontSpare) override;
+
     /// get capacity in bytes of buffer
     virtual uint64_t Capacity() const override;
     /// get number of free bytes at back
@@ -137,6 +141,16 @@ inline void BufferDbl::operator=(BufferDbl&& rhs) {
     rhs.data = nullptr;
 }
 
+inline void BufferDbl::Allocate(uint64_t newCapacity)
+{
+    Allocate(newCapacity, SpareFront());
+}
+
+inline void BufferDbl::Allocate(uint64_t newCapacity, uint64_t frontSpare)
+{
+    alloc(newCapacity, 0, frontSpare);
+}
+
 //------------------------------------------------------------------------------
 inline uint64_t BufferDbl::Size() const {
     return size;
@@ -154,8 +168,8 @@ inline uint64_t BufferDbl::SpareBack() const {
 //------------------------------------------------------------------------------
 inline void BufferDbl::ReserveBack(uint64_t numBytes) {
     // need to grow?
-    if ((size + numBytes) > capacity) {
-        const uint64_t newCapacity = size + numBytes;
+    if ((start + size + numBytes) > capacity) {
+        const uint64_t newCapacity = start + size + numBytes;
         alloc((int)newCapacity);
     }
 }
@@ -177,7 +191,7 @@ inline void BufferDbl::ReserveFront(uint64_t numBytes)
 //------------------------------------------------------------------------------
 inline uint8_t* BufferDbl::AddBack(uint64_t numBytes) {
     ReserveBack(numBytes);
-    uint8_t* ptr = data + size;
+    uint8_t* ptr = Data(Size());
     size += numBytes;
     return ptr;
 }
@@ -190,14 +204,11 @@ BufferDbl::Clear() {
 
 inline uint8_t* BufferDbl::AddFront(uint64_t numBytes)
 {
-    if(numBytes>SpareBack())
-        alloc(Size()+numBytes,numBytes);
-    else {
-        Oryol::Memory::Move(data, data + numBytes, (int)numBytes);
-        size += numBytes;
-    }
+    ReserveFront(numBytes);
+    start -= numBytes;
+    size += numBytes;   
 
-    return data;
+    return Data();
 }
 
 inline uint8_t* BufferDbl::AddInsert(uint64_t offset, uint64_t numBytes)
@@ -205,10 +216,12 @@ inline uint8_t* BufferDbl::AddInsert(uint64_t offset, uint64_t numBytes)
     if (offset < Size() - offset && SpareFront() > numBytes) {
         ReserveFront(numBytes);
         start -= numBytes;
-        Oryol::Memory::Move(Data(numBytes), Data(), (int)offset);               
+        if (offset)
+            Oryol::Memory::Move(Data(numBytes), Data(), (int)offset);               
     } else {
         ReserveBack(numBytes);
-        Oryol::Memory::Move(Data(offset), Data(offset + numBytes), (int)(Size()-offset));
+        if (Size() - offset)
+            Oryol::Memory::Move(Data(offset), Data(offset + numBytes), (int)(Size()-offset));
     }
 
     size += numBytes;
@@ -227,27 +240,32 @@ inline uint64_t BufferDbl::Remove(uint64_t offset, uint64_t numBytes) {
     }
     o_assert_dbg((offset + numBytes) <= size);
     o_assert_dbg(numBytes >= 0);
-    if (numBytes > 0) {
+
+    if (!offset) {// no move nessacary
+        start += numBytes;
+    } else if (numBytes > 0) {
         uint64_t bytesToMove = size - (offset + numBytes);
         if (bytesToMove > 0) {
             Oryol::Memory::Move(Data(offset + numBytes), Data(offset) , (int)bytesToMove);
-        }
-        size -= numBytes;
-        o_assert_dbg(size >= 0);
+            // clear leftover bits so nobody tries to destroy them.
+            Oryol::Memory::Fill(Data(offset + bytesToMove), (int)numBytes, 0);
+        }        
     }
+    size -= numBytes;
+    o_assert_dbg(size >= 0);
     return numBytes;
 }
 
 //------------------------------------------------------------------------------
 inline const uint8_t* BufferDbl::Data(uint64_t offset) const {
-    o_assert(data);
+    //o_assert(data);
     return data+start+offset;
 }
 
 //------------------------------------------------------------------------------
 inline uint8_t*
 BufferDbl::Data(uint64_t offset) {
-    o_assert(data);
+    //o_assert(data);
     return data + start+offset;
 }
 

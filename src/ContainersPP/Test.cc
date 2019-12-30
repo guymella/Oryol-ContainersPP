@@ -12,7 +12,7 @@
 //using namespace ContainersPP;
 #define CHECK o_assert_dbg
 int main(void) {
-	//TODO:: test insert and overwrite
+	//TODO:: test insert, overwrite, addfront
 	CHECK(BlockTest<Block>());
 	CHECK(BlockTest<Buffer>());
 	CHECK(BufferTest<Buffer>());
@@ -27,6 +27,7 @@ int main(void) {
 	CHECK(a.Size() == 4);
 	CHECK(a.Data(a.Size()) - a.Data() == 16);
 
+	CHECK(elementBufferTest<TypeBuffer<_test>>());
 
 	return 0;
 }

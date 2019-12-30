@@ -23,7 +23,8 @@ public:
     /// destructor
     ~Buffer();
 
-   
+    /// Force Allocate the buffer
+    virtual void Allocate(uint64_t newCapacity);
 
     /// move-assignment
     void operator=(Buffer&& rhs);
@@ -94,6 +95,11 @@ data(rhs.data) {
 inline
 Buffer::~Buffer() {
     destroy();
+}
+
+inline void Buffer::Allocate(uint64_t newCapacity)
+{
+    alloc(newCapacity);
 }
 
 //------------------------------------------------------------------------------

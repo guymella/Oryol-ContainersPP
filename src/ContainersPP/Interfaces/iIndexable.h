@@ -40,8 +40,7 @@ namespace ContainersPP {
 	   //virtual void Shift(const int64_t& shiftAmmount);
 	   //virtual void ShiftLeft(const uint64_t& shiftAmmount) = 0;
 	   //virtual void ShiftRight(const uint64_t& shiftAmmount) = 0;
-	   //CLear The Array
-		virtual void Clear() = 0;
+	   
 	};
 
 
@@ -53,7 +52,7 @@ namespace ContainersPP {
 		/// move-insert element at index, keep array order
 		virtual void Insert(uint64_t index, TYPE&& elm) = 0;
 		/// insert default initialized elements into array
-		virtual void insertBlank(const uint64_t& index, uint64_t count = 1) = 0;
+		virtual void InsertBlank(const uint64_t& index, uint64_t count = 1) = 0;
 		/// erase element at index, keep element order, return erased Element
 		virtual TYPE Erase(uint64_t index) = 0;
 		/// erase element at index, swap-in front or back element (destroys element ordering), return erased Element
@@ -64,6 +63,8 @@ namespace ContainersPP {
 		virtual TYPE EraseSwapFront(uint64_t index) = 0;
 		/// erase a range of elements, keep element order
 		virtual void EraseRange(uint64_t index, uint64_t num = std::numeric_limits<uint64_t>::max()) = 0;
+		//CLear The Array
+		virtual void Clear() = 0;
 	};
 
 	template <typename TYPE>

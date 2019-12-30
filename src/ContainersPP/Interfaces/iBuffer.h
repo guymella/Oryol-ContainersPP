@@ -31,6 +31,9 @@ namespace ContainersPP {
 
     class iBufferV : public iBlockD, public iBufferBack { //single ended buffer interface (vector)
     public:
+        /// Force Allocate the buffer
+        virtual void Allocate(uint64_t newCapacity) = 0;
+
         /// get capacity in bytes of buffer
         virtual uint64_t Capacity() const = 0;
         /// get number of free bytes at back
@@ -61,6 +64,11 @@ namespace ContainersPP {
 
     class iBufferD : public iBufferV, public iBufferFront { //double endded buffer interface (Buffer)
     public:
+        /// Force Allocate the buffer
+        virtual void Allocate(uint64_t newCapacity) override = 0;
+        /// Force Allocate the buffer
+        virtual void Allocate(uint64_t newCapacity, uint64_t frontSpare) = 0;
+
         /// get capacity in bytes of buffer
         virtual uint64_t Capacity() const = 0;
         
