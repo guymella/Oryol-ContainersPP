@@ -7,11 +7,12 @@
 #include "ContainersPP/Containers/BufferDbl.h"
 #include "ContainersPP/Containers/TypeBuffer.h"
 #include "UnitTests/BufferTest.h"
+#include "UnitTests/elementBufferTest.h"
 //#include "Core/Containers/Array.h"
 //using namespace ContainersPP;
 #define CHECK o_assert_dbg
 int main(void) {
-	
+	//TODO:: test insert and overwrite
 	CHECK(BlockTest<Block>());
 	CHECK(BlockTest<Buffer>());
 	CHECK(BufferTest<Buffer>());

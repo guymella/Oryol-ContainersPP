@@ -33,6 +33,8 @@ namespace ContainersPP {
         using iBlockD::CopyFront;
         /// add uninitialized bytes to front of Block, return pointer to start
         virtual uint8_t* AddFront(uint64_t numBytes) override;
+        /// insert uninitialized bytes to Block, return pointer to start
+        virtual uint8_t* AddInsert(uint64_t offset, uint64_t numBytes) override;
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) override;
         /// clear the Block (deletes content, keeps capacity)
@@ -147,6 +149,13 @@ namespace ContainersPP {
     {
         alloc(Size()+numBytes, numBytes);
         return Data();
+    }
+
+    inline uint8_t* Block::AddInsert(uint64_t offset, uint64_t numBytes)
+    {
+        alloc(Size() + numBytes);
+        Oryol::Memory::Move(Data(offset), Data(offset+ numBytes), (int)numBytes);
+        return Data(offset);
     }
 
     //------------------------------------------------------------------------------

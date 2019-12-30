@@ -8,19 +8,18 @@
 #include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
+#include "iCountable.h"
 
 
 namespace ContainersPP {
     
-    class iBlockS { //static block interface
+    class iBlockS : public iCountable { //static block interface
     public:
         /// CopyAssign
         virtual void operator=(const iBlockS& rhs);
 
         /// get number of bytes in buffer
-        virtual uint64_t Size() const = 0;
-        /// return true if empty
-        virtual bool Empty() const;
+        virtual uint64_t Size() const override = 0;
         /// get read-only pointer to content (throws assert if would return nullptr)
         virtual const uint8_t* Data(uint64_t offset = 0) const = 0;
         /// get read/write pointer to content (throws assert if would return nullptr)
@@ -49,13 +48,21 @@ namespace ContainersPP {
         virtual void CopyFront(const uint8_t* data, uint64_t numBytes);
         /// add uninitialized bytes to front of Block, return pointer to start
         virtual uint8_t* AddFront(uint64_t numBytes) = 0;
+        /// copy bytes into Block move contents to make room
+        virtual void CopyInsert(uint64_t offset, const uint8_t* data, uint64_t numBytes);
+        /// insert uninitialized bytes to Block, return pointer to start
+        virtual uint8_t* AddInsert(uint64_t offset, uint64_t numBytes) = 0;
+        /// overwite bytes inside of Block
+        virtual void CopyOver(uint64_t offset, uint64_t numReplace, const uint8_t* data, uint64_t numBytes);
+        /// add uninitialized bytes to front of Block, return pointer to start
+        virtual uint8_t* AddOver(uint64_t offset, uint64_t numReplace, uint64_t numBytes);
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) = 0;
         /// clear the Block (deletes content, keeps capacity)
         virtual void Clear() = 0;
 
     protected:
-        /// copy content into currently allocated buffer, bump size
+        /// overwite all content into currently allocated buffer, bump size
         virtual void copy(const uint8_t* ptr, uint64_t numBytes, uint64_t offset = 0) override;
     };
 
@@ -74,11 +81,6 @@ namespace ContainersPP {
         Oryol::Memory::Copy(ptr, Data(offset), (int)numBytes);
     }
 
-    //------------------------------------------------------------------------------
-    inline bool iBlockS::Empty() const {
-        return !Size();
-    }    
-
     inline void iBlockD::copy(const uint8_t* ptr, uint64_t numBytes, uint64_t offset)
     {
         Clear();
@@ -93,5 +95,21 @@ namespace ContainersPP {
     inline void iBlockD::CopyFront(const uint8_t* data, uint64_t numBytes)
     {
         Oryol::Memory::Copy(data, AddFront(numBytes), (int)numBytes);
+    }
+    inline void iBlockD::CopyInsert(uint64_t offset, const uint8_t* data, uint64_t numBytes)
+    {
+        Oryol::Memory::Copy(data, AddInsert(offset,numBytes), (int)numBytes);
+    }
+    inline void iBlockD::CopyOver(uint64_t offset, uint64_t numReplace, const uint8_t* data, uint64_t numBytes)
+    {
+        Oryol::Memory::Copy(data, AddOver(offset, numReplace,numBytes), (int)numBytes);
+    }
+    inline uint8_t* iBlockD::AddOver(uint64_t offset, uint64_t numReplace, uint64_t numBytes)
+    {
+        if (numReplace > numBytes)//remove some
+            Remove(offset + numBytes, numReplace - numBytes);
+        else //add some
+            AddInsert(offset + numReplace, numBytes - numReplace);
+        return Data(offset);
     }
 } // namespace

@@ -17,7 +17,7 @@ fips_begin_module(ContainersPP)
         #Queue.h
         #Set.h
         #StaticArray.h
-        #elementBuffer.h
+        elementBuffer.h
         #InlineArray.h
 		#Trie.h
 		#Allocator.h
@@ -25,6 +25,10 @@ fips_begin_module(ContainersPP)
 
     fips_dir(Interfaces)
     fips_files(
+        iCountable.h
+        iIndexable.h
+        iIterable.h
+        iQueue.h
         iArray.h iArray.cpp
         iBlock.h
 		iBuffer.h
@@ -47,6 +51,7 @@ fips_begin_app(test cmdline)
         fips_files(
             BlockTest.h
             BufferTest.h
+            elementBufferTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
