@@ -8,211 +8,47 @@
 #include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
-#include "ContainersPP/Containers/Array.h"
+#include "ContainersPP/Containers/TypeBuffer.h"
 
 namespace ContainersPP {
 
 class Allocator {
 public:
     /// default constructor
-    Allocator();
+    Allocator() {};
+    /// Copy constructor
+    Allocator(const Allocator& rhs) { buffers = rhs.buffers; };
     /// move constructor
-    Allocator(Allocator&& rhs);
+    Allocator(Allocator&& rhs) { buffers = std::move(rhs.buffers); };
     /// destructor
-    ~Allocator();
+    //~Allocator();
 
-    /// always force move-construct
-    //Buffer(const Buffer& rhs) = delete;
-    /// always force move-assign
-    //void operator=(const Buffer& rhs) = delete;
+    Buffer& operator[](uint64_t index) { return buffers[index]; };
+    const Buffer& operator[](uint64_t index) const { return buffers[index]; };
 
-    /// move-assignment
-    //void operator=(Buffer&& rhs);
+    uint64_t New();
+    uint64_t New(uint64_t newSize);
 
     /// get number of buffers
-    int Count() const;
+    uint64_t Count() const { return buffers.Size(); };
     /// return true if empty
-    bool Empty() const;
-
-    
-
+    bool Empty() const { return !Count(); };
 private:
-    Array<_priv::elementBuffer> buffers;
-
-    int size;
-    int capacity;
-    uint8_t* data;
+    TypeVector<Buffer> buffers;
 };
 
-//------------------------------------------------------------------------------
-inline
-Buffer::Buffer() :
-size(0),
-capacity(0),
-data(nullptr) {
-    // empty
+uint64_t ContainersPP::Allocator::New()
+{
+    uint64_t id = Count();
+    buffers.PushBack(Buffer());
+    return id;
 }
 
-//------------------------------------------------------------------------------
-inline
-Buffer::Buffer(Buffer&& rhs) :
-size(rhs.size),
-capacity(rhs.capacity),
-data(rhs.data) {
-    rhs.size = 0;
-    rhs.capacity = 0;
-    rhs.data = nullptr;
-}
-
-//------------------------------------------------------------------------------
-inline
-Buffer::~Buffer() {
-    this->destroy();
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::alloc(int newCapacity) {
-    o_assert_dbg(newCapacity > this->capacity);
-    o_assert_dbg(newCapacity > this->size);
-
-    uint8_t* newBuf = (uint8_t*) Memory::Alloc(newCapacity);
-    if (this->size > 0) {
-        o_assert_dbg(this->data);
-        Memory::Copy(this->data, newBuf, this->size);
-    }
-    if (this->data) {
-        Memory::Free(this->data);
-    }
-    this->data = newBuf;
-    this->capacity = newCapacity;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::destroy() {
-    if (this->data) {
-        Memory::Free(this->data);
-    }
-    this->data = nullptr;
-    this->size = 0;
-    this->capacity = 0;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::copy(const uint8_t* ptr, int numBytes) {
-    // NOTE: it is valid to call copy with numBytes==0
-    o_assert_dbg(this->data);
-    o_assert_dbg((this->size + numBytes) <= this->capacity);
-    Memory::Copy(ptr, this->data + this->size, numBytes);
-    this->size += numBytes;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::operator=(Buffer&& rhs) {
-    this->destroy();
-    this->size = rhs.size;
-    this->capacity = rhs.capacity;
-    this->data = rhs.data;
-    rhs.size = 0;
-    rhs.capacity = 0;
-    rhs.data = nullptr;
-}
-
-//------------------------------------------------------------------------------
-inline int
-Buffer::Size() const {
-    return this->size;
-}
-
-//------------------------------------------------------------------------------
-inline bool
-Buffer::Empty() const {
-    return 0 == this->size;
-}
-
-//------------------------------------------------------------------------------
-inline int
-Buffer::Capacity() const {
-    return this->capacity;
-}
-
-//------------------------------------------------------------------------------
-inline int
-Buffer::Spare() const {
-    return this->capacity - this->size;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::Reserve(int numBytes) {
-    // need to grow?
-    if ((this->size + numBytes) > this->capacity) {
-        const int newCapacity = this->size + numBytes;
-        this->alloc(newCapacity);
-    }
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::Add(const uint8_t* data, int numBytes) {
-    this->Reserve(numBytes);
-    this->copy(data, numBytes);
-}
-
-//------------------------------------------------------------------------------
-inline uint8_t*
-Buffer::Add(int numBytes) {
-    this->Reserve(numBytes);
-    uint8_t* ptr = this->data + this->size;
-    this->size += numBytes;
-    return ptr;
-}
-
-//------------------------------------------------------------------------------
-inline void
-Buffer::Clear() {
-    this->size = 0;
-}
-
-//------------------------------------------------------------------------------
-inline int
-Buffer::Remove(int offset, int numBytes) {
-    o_assert_dbg(offset >= 0);
-    o_assert_dbg(numBytes >= 0);
-    if (offset >= this->size) {
-        return 0;
-    }
-    if ((offset + numBytes) >= this->size) {
-        numBytes = this->size - offset;
-    }
-    o_assert_dbg((offset + numBytes) <= this->size);
-    o_assert_dbg(numBytes >= 0);
-    if (numBytes > 0) {
-        int bytesToMove = this->size - (offset + numBytes);
-        if (bytesToMove > 0) {
-            Memory::Move(this->data + offset + numBytes, this->data + offset, bytesToMove);
-        }
-        this->size -= numBytes;
-        o_assert_dbg(this->size >= 0);
-    }
-    return numBytes;
-}
-
-//------------------------------------------------------------------------------
-inline const uint8_t*
-Buffer::Data() const {
-    o_assert(this->data);
-    return this->data;
-}
-
-//------------------------------------------------------------------------------
-inline uint8_t*
-Buffer::Data() {
-    o_assert(this->data);
-    return this->data;
+inline uint64_t Allocator::New(uint64_t newSize)
+{
+    uint64_t id = Count();
+    buffers.PushBack(Buffer(newSize));
+    return id;
 }
 
 } // namespace Oryol

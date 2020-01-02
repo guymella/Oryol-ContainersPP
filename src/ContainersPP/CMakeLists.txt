@@ -19,8 +19,8 @@ fips_begin_module(ContainersPP)
         #StaticArray.h
         elementBuffer.h
         #InlineArray.h
-		#Trie.h
-		#Allocator.h
+		Trie.h
+		Allocator.h
     )
 
     fips_dir(Interfaces)

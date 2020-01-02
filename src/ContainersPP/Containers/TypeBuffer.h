@@ -18,6 +18,7 @@ namespace ContainersPP {
         TypeBlock() {};
         TypeBlock(const TypeBlock& rhs) : buffer(rhs.buffer) {};
         TypeBlock(TypeBlock&& rhs) : buffer(std::move(rhs.buffer)) {};
+        ~TypeBlock() { Clear(); };
         /// MoveAssign
         virtual void operator=(TypeBlock&& rhs);
         /// CopyAssign
@@ -35,6 +36,7 @@ namespace ContainersPP {
         TypeVector() {};
         TypeVector(const TypeVector& rhs) : buffer(rhs.buffer) {};
         TypeVector(TypeVector&& rhs) : buffer(std::move(rhs.buffer)) {};
+        ~TypeVector() { Clear(); };
         /// CopyAssign
         virtual void operator=(TypeVector&& rhs);
         /// CopyAssign
@@ -52,6 +54,7 @@ public:
     TypeBuffer() {};
     TypeBuffer(const TypeBuffer& rhs) : buffer(rhs.buffer) {};
     TypeBuffer(TypeBuffer&& rhs) : buffer(std::move(rhs.buffer)) {};
+    ~TypeBuffer() { Clear(); };
     /// MoveAssign
     virtual void operator=(TypeBuffer&& rhs);
     /// CopyAssign

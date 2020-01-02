@@ -16,6 +16,8 @@ class Buffer : public iBufferV{
 public:
     /// default constructor
     Buffer(); 
+    /// default constructor
+    Buffer(uint64_t newCapacity);
     /// Copy-construct
     Buffer(const Buffer& rhs);
     /// move constructor
@@ -25,7 +27,8 @@ public:
 
     /// Force Allocate the buffer
     virtual void Allocate(uint64_t newCapacity);
-
+    /// move-assignment
+    virtual void operator=(const Buffer& rhs);
     /// move-assignment
     void operator=(Buffer&& rhs);
     /// get capacity in bytes of buffer
@@ -61,9 +64,9 @@ private:
     /// destroy buffer
     void destroy();    
 
-    uint64_t size;
-    uint64_t capacity;
-    uint8_t* data;
+    uint64_t size = 0;
+    uint64_t capacity = 0;
+    uint8_t* data = 0;
 };
 
 //------------------------------------------------------------------------------
@@ -73,6 +76,11 @@ size(0),
 capacity(0),
 data(nullptr) {
     // empty
+}
+
+inline Buffer::Buffer(uint64_t newCapacity)
+{
+    alloc(newCapacity);
 }
 
 inline Buffer::Buffer(const Buffer& rhs)
@@ -100,6 +108,11 @@ Buffer::~Buffer() {
 inline void Buffer::Allocate(uint64_t newCapacity)
 {
     alloc(newCapacity);
+}
+
+inline void Buffer::operator=(const Buffer& rhs)
+{
+    copy(rhs.Data(), rhs.Size());
 }
 
 //------------------------------------------------------------------------------
