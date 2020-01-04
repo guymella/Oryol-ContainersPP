@@ -12,12 +12,12 @@
 //#include <algorithm>
 #include "ContainersPP/Containers/Allocator.h"
 #include "ContainersPP/Types/Types.h"
-
+#include "ContainersPP/Types/KeyString.h"
 
 
 namespace ContainersPP {
     struct NodeKey {
-        NodeKey( const TypeVector<uint8_t>& key, uint64_t tare = 0 , uint64_t valID = 0, uint64_t postID = 0);
+        NodeKey( const Types::KeyString& key, uint64_t tare = 0 , uint64_t valID = 0, uint64_t postID = 0);
         uint64_t PostID = 0;
         uint64_t ValID = 0;
         uint64_t KeyLen = 0;
@@ -25,33 +25,11 @@ namespace ContainersPP {
         NodeKey* Next() { return (NodeKey*)(Key() + KeyLen); }
     };
 
-    ContainersPP::NodeKey::NodeKey(const TypeVector<uint8_t>& key, uint64_t tare, uint64_t valID, uint64_t postID) : ValID(valID), PostID(postID)
+    ContainersPP::NodeKey::NodeKey(const Types::KeyString& key, uint64_t tare, uint64_t valID, uint64_t postID) : ValID(valID), PostID(postID)
     {
         KeyLen = key.Size() - tare;
         Oryol::Memory::Copy(key.Data(tare), Key(), (int)KeyLen);
     }
-
-    struct KeyCompare {
-        KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize);
-        size_t commonPrefix = 0;
-        size_t lhsPostfix = 0;
-        size_t rhsPostfix = 0;
-        bool lhsLesser = false;
-        bool Equal() { return !(lhsPostfix || rhsPostfix); }
-
-    };
-    KeyCompare::KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
-    {
-        size_t compSize = (lhsSize < rhsSize) ? lhsSize : rhsSize;
-
-        while (*lhs == *rhs && commonPrefix < compSize)
-            commonPrefix++, lhs++, rhs++;
-
-        lhsPostfix = lhsSize - commonPrefix;
-        rhsPostfix = rhsSize - commonPrefix;
-        lhsLesser = *(lhs) < *(rhs);
-    }
-
 
 
 //template<class VALUE> 
@@ -76,25 +54,25 @@ public:
     /// clear the array (deletes elements, keeps capacity)
     void Clear() {};
     /// test if an element exists
-    bool Contains(const TypeVector<uint8_t>& key) const;
-    bool Contains(const char* key) const { return Contains(MakeKey(key)); };
+    bool Contains(const Types::KeyString& key) const;
+    bool Contains(const char* key) const { return Contains(Types::MakeKey(key)); };
     /// find element
-    const iBufferV* Find(const TypeVector<uint8_t>& key) const;
-    const iBufferV* Find(const char* key) const { return Find(MakeKey(key)); };
+    const iBufferV* Find(const Types::KeyString& key) const;
+    const iBufferV* Find(const char* key) const { return Find(Types::MakeKey(key)); };
     /// add element
-    iBufferV& GetOrAdd(const TypeVector<uint8_t>& key);
-    iBufferV& GetOrAdd(const char* key) { return GetOrAdd(MakeKey(key)); };
+    iBufferV& GetOrAdd(const Types::KeyString& key);
+    iBufferV& GetOrAdd(const char* key) { return GetOrAdd(Types::MakeKey(key)); };
     /// erase element
-    void Erase(const TypeVector<uint8_t>& key) {}; //TODO::
-    void Erase(const char* key) { return Erase(MakeKey(key)); };
+    void Erase(const Types::KeyString& key) {}; //TODO::
+    void Erase(const char* key) { return Erase(Types::MakeKey(key)); };
     
 private:
     static void InitializeNode(iBufferV& nodeBuffer);
-    iBufferV& InsertNewKey(uint64_t nodeID, uint8_t index, const TypeVector<uint8_t>& key, uint64_t tare);
-    iBufferV& InsertKey(iBufferV& nodeBuffer, uint8_t index, const TypeVector<uint8_t>& key, uint64_t tare = 0,uint64_t ValID = 0, uint64_t PostID = 0);
+    iBufferV& InsertNewKey(uint64_t nodeID, uint8_t index, const Types::KeyString& key, uint64_t tare);
+    iBufferV& InsertKey(iBufferV& nodeBuffer, uint8_t index, const Types::KeyString& key, uint64_t tare = 0,uint64_t ValID = 0, uint64_t PostID = 0);
     uint64_t PushDown(uint64_t nodeID, uint64_t index, uint64_t prefixLen);
     static uint64_t GetKeyOffset(const iBufferV& nodeBuffer, uint64_t index);
-    static TypeVector<uint8_t> MakeKey(const char* key);
+    //static TypeVector<uint8_t> MakeKey(const char* key);
 
     Allocator allocator;
 
@@ -107,12 +85,12 @@ inline Trie::Trie()
     o_assert_dbg(allocator.Count() == 1);
 }
 
-inline bool Trie::Contains(const TypeVector<uint8_t>& key) const
+inline bool Trie::Contains(const Types::KeyString& key) const
 {
     return Find(key) != nullptr;
 }
 
-inline const iBufferV* Trie::Find(const TypeVector<uint8_t>& key) const
+inline const iBufferV* Trie::Find(const Types::KeyString& key) const
 {
     const iBufferV* node = &allocator[0];
     uint8_t count = *node->Data();
@@ -138,7 +116,7 @@ inline const iBufferV* Trie::Find(const TypeVector<uint8_t>& key) const
             const iBufferV* valPtr = (nk->ValID) ? &allocator[nk->ValID] : nullptr;
 
             //compare the keys
-            KeyCompare c(checkItr, keyItr, nk->KeyLen, key.Size()-tare);
+            Types::KeyCompare c(checkItr, keyItr, nk->KeyLen, key.Size()-tare);
             
             if (c.Equal()) // found
                 return valPtr;
@@ -159,7 +137,7 @@ inline const iBufferV* Trie::Find(const TypeVector<uint8_t>& key) const
     return nullptr;
 }
 
-inline iBufferV& Trie::GetOrAdd(const TypeVector<uint8_t>& key)
+inline iBufferV& Trie::GetOrAdd(const Types::KeyString& key)
 {
     uint64_t NodeID = 0;
     iBufferV* node = &allocator[NodeID];
@@ -187,7 +165,7 @@ inline iBufferV& Trie::GetOrAdd(const TypeVector<uint8_t>& key)
             }
 
             //compare the keys
-            KeyCompare c(checkItr, keyItr, nk->KeyLen, key.Size());
+            Types::KeyCompare c(checkItr, keyItr, nk->KeyLen, key.Size());
 
             if (c.Equal()) { // found
                 uint64_t ValID = nk->ValID;
@@ -241,12 +219,12 @@ inline void Trie::InitializeNode(iBufferV& nodeBuffer)
     *nodeBuffer.Data() = 0;
 }
 
-inline iBufferV& Trie::InsertNewKey(uint64_t nodeID, uint8_t index, const TypeVector<uint8_t>& key, uint64_t tare)
+inline iBufferV& Trie::InsertNewKey(uint64_t nodeID, uint8_t index, const Types::KeyString& key, uint64_t tare)
 {
     return InsertKey(allocator[nodeID], index, key, tare, allocator.New());
 }
 
-inline iBufferV& Trie::InsertKey(iBufferV& nodeBuffer, uint8_t index, const TypeVector<uint8_t>& key, uint64_t tare, uint64_t ValID, uint64_t PostID)
+inline iBufferV& Trie::InsertKey(iBufferV& nodeBuffer, uint8_t index, const Types::KeyString& key, uint64_t tare, uint64_t ValID, uint64_t PostID)
 {
     o_assert_dbg(*(nodeBuffer.Data()) >= index); //index is less than count
     //find index of insert
@@ -297,11 +275,11 @@ inline uint64_t Trie::GetKeyOffset(const iBufferV& nodeBuffer, uint64_t index)
     return offset;
 }
 
-inline TypeVector<uint8_t> Trie::MakeKey(const char* key)
-{
-    TypeVector<uint8_t> newKey;
-    newKey.CopyBack((const uint8_t*)key, std::strlen(key));
-    return newKey;
-}
+//inline TypeVector<uint8_t> Trie::MakeKey(const char* key)
+//{
+//    TypeVector<uint8_t> newKey;
+//    newKey.CopyBack((const uint8_t*)key, std::strlen(key));
+//    return newKey;
+//}
 
 } // namespace Oryol

@@ -6,11 +6,13 @@
 #include "ContainersPP/Containers/Buffer.h"
 #include "ContainersPP/Containers/BufferDbl.h"
 #include "ContainersPP/Containers/TypeBuffer.h"
-#include "UnitTests/BufferTest.h"
-#include "UnitTests/elementBufferTest.h"
+
 #include "ContainersPP/Containers/Allocator.h"
 #include "ContainersPP/Containers/Trie.h"
 
+#include "UnitTests/BufferTest.h"
+#include "UnitTests/elementBufferTest.h"
+#include "UnitTests/StructTest.h"
 
 //#include "Core/Containers/Array.h"
 //using namespace ContainersPP;
@@ -36,9 +38,13 @@ int main(void) {
 	CHECK(elementBufferTest<TypeBuffer<_test>>());
 
 
+	CHECK(TestStruct());
+
 	//TODO:: Test Allcoator
 	Allocator a1;
 
+
+	//TODO:: Test Trie
 	Trie t;
 	
 	//add first key

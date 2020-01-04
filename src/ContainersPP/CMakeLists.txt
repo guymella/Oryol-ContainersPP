@@ -38,6 +38,9 @@ fips_begin_module(ContainersPP)
     fips_dir(Types)
     fips_files(
         Types.h
+        KeyString.h
+        TypeDescr.h
+        Schema.h
     )
 
     fips_deps(Core)
@@ -52,6 +55,7 @@ fips_begin_app(test cmdline)
             BlockTest.h
             BufferTest.h
             elementBufferTest.h
+            StructTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
