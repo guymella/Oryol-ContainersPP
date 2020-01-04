@@ -23,7 +23,7 @@ namespace ContainersPP {
 			size_t FindIndex(const char* name) const;
 			bool AddAttribute(const KeyString& name, Types::TypeDescr type);
 			bool AddAttribute(const char* name, Types::baseTypes type);
-		private:
+		//private:
 			size_t SequenceStart(TypeSequence seq) const;
 			void init();
 			size_t fixedSize = 0;
@@ -190,6 +190,7 @@ namespace ContainersPP {
 			//check name
 			for (size_t i = 0; i < labels.Size(); i++) {
 				const KeyString& c = labels[i];
+				const uint8_t* p = c.begin();
 				if (c == name)
 					return i;
 			}
@@ -213,8 +214,9 @@ namespace ContainersPP {
 				fixedSize = std::numeric_limits<size_t>::max();
 
 			size_t seqStart = SequenceStart(seq);
+			size_t seqEnd = seqStart + Sequence[seq];
 			//sort by name
-			for (uint64_t i = seqStart; i < seqStart + Sequence[seq]; i++)
+			for (uint64_t i = seqStart; i < seqEnd; i++)
 				if (labels[seqStart] < name)
 					seqStart++;
 				else

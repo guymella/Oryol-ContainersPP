@@ -17,14 +17,14 @@ namespace ContainersPP {
 
 		typedef TypeVector<uint8_t> KeyString;
 
-		KeyString MakeKey(const char* key)
+		static KeyString MakeKey(const char* key)
 		{
 			KeyString newKey;
 			newKey.CopyBack((const uint8_t*)key, std::strlen(key));
 			return newKey;
 		}
 
-		bool operator==(const KeyString& lhs, const KeyString& rhs) {
+		static bool operator==(const KeyString& lhs, const KeyString& rhs) {
 			if (lhs.Size() != rhs.Size())
 				return false;
 			return !std::memcmp(lhs.begin(), rhs.begin(), lhs.Size());

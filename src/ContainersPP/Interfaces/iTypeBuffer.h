@@ -185,7 +185,10 @@ namespace ContainersPP {
     template<typename TYPE>
     inline void iTypeBlock<TYPE>::operator=(const iTypeBlock& rhs)
     {
-        copy(rhs.Data(), rhs.Size());
+        if (rhs.Size())
+            copy(rhs.Data(), rhs.Size());
+        else
+            Clear();
     }
 
     template<typename TYPE>
@@ -278,7 +281,8 @@ namespace ContainersPP {
     template<typename TYPE>
     inline void iTypeBlock<TYPE>::Insert(uint64_t index, const TYPE& elm)
     {
-        CopyInsert(index, (uint8_t*)(&elm), 1);
+        new (AddInsert(index, 1)) TYPE(elm);
+        //CopyInsert(index, (uint8_t*)(&elm), 1);
     }
 
     template<typename TYPE>
@@ -340,8 +344,14 @@ namespace ContainersPP {
     inline void iTypeBlock<TYPE>::copy(const uint8_t* ptr, uint64_t numElements, uint64_t offset)
     {
         Buffer().Clear();
-        Buffer().AddBack(offset);
-        Buffer().CopyBack(ptr, numElements * UnitSize());
+        Buffer().AddBack((offset+ numElements)* UnitSize());
+        TYPE* cpyPtr = (TYPE*)ptr;
+        TYPE* myPtr = begin();
+        for (uint64_t i = 0; i < offset; i++)
+            new (myPtr++) TYPE();
+        for (uint64_t i = offset; i < numElements; i++)
+            new (myPtr++) TYPE(*cpyPtr++);
+        //Buffer().CopyBack(ptr, numElements * UnitSize());
     }
 
     template<typename TYPE>

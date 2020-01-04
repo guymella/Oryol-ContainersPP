@@ -91,6 +91,7 @@ namespace ContainersPP {
 			bool AddConstraint(Constraint&& constraint);
 			iTypeVector<uint8_t>* Contains(const KeyString& key) const;
 			bool operator==(const Constraint& rhs) const { return true; };
+			void operator=(const Constraints& rhs) { constraints = rhs.constraints; }
 		private:
 			TypeVector<Constraint> constraints;
 		};
@@ -113,6 +114,12 @@ namespace ContainersPP {
 		}
 
 		struct TypeDescr {
+			TypeDescr() {};
+			TypeDescr(baseTypes type, uint8_t flags) : type(type), flags(flags) {};
+			TypeDescr(const TypeDescr& rhs) { copy(rhs); };
+			TypeDescr(TypeDescr&& rhs) { move(std::move(rhs)); };
+			void operator=(const TypeDescr& rhs) { copy(rhs); };
+			void operator=(TypeDescr&& rhs) { move(std::move(rhs)); };
 			baseTypes type = baseTypes::Void;
 			uint8_t flags = 0;
 			Constraints constraints;
@@ -136,6 +143,10 @@ namespace ContainersPP {
 
 			static uint8_t setFLags(bool nullable, bool Multiple, bool Sparse, bool Constrained, bool Derived, bool Cached, bool Subscribable);
 			TypeSequence getTypeSequence() const;
+
+		private:
+			void copy(const TypeDescr& rhs);
+			void move(TypeDescr&& rhs);
 		};
 
 		inline bool TypeDescr::operator==(const TypeDescr& rhs) const
@@ -250,6 +261,20 @@ namespace ContainersPP {
 				}
 			}
 			return TypeSequence::Uncached;
+		}
+		inline void TypeDescr::copy(const TypeDescr& rhs)
+		{
+			type = rhs.type;
+			flags = rhs.flags;
+			constraints = rhs.constraints;
+		}
+		inline void TypeDescr::move(TypeDescr&& rhs)
+		{
+			type = rhs.type;
+			flags = rhs.flags;
+			constraints = std::move(rhs.constraints);
+			rhs.type = baseTypes::Void;
+			rhs.flags = 0;
 		}
 	};
 };

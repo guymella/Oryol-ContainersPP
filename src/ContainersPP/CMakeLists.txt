@@ -41,6 +41,7 @@ fips_begin_module(ContainersPP)
         KeyString.h
         TypeDescr.h
         Schema.h
+        BitPointer.h
     )
 
     fips_deps(Core)

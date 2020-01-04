@@ -121,6 +121,7 @@ inline void Buffer::alloc(uint64_t newCapacity, uint64_t offset) {
     o_assert_dbg(newCapacity > size + offset);
 
     uint8_t* newBuf = (uint8_t*) Oryol::Memory::Alloc((int)newCapacity);
+    Oryol::Memory::Fill(newBuf, (int)newCapacity, 0);
     if (size > 0) {
         o_assert_dbg(data);
         Oryol::Memory::Copy(data, newBuf + offset, (int)size);
@@ -207,6 +208,7 @@ inline uint8_t* Buffer::AddInsert(uint64_t offset, uint64_t numBytes)
 {
     ReserveBack(numBytes);
     Oryol::Memory::Move(Data(offset), Data(offset + numBytes), (int)(Size() - offset));
+    Oryol::Memory::Fill(Data(offset), (int)numBytes, 0);
     size += numBytes;
     return Data(offset);
 }
