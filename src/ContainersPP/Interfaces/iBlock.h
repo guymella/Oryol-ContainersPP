@@ -9,6 +9,7 @@
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
 #include "iCountable.h"
+#include <algorithm>
 
 
 namespace ContainersPP {
@@ -58,6 +59,8 @@ namespace ContainersPP {
         virtual uint8_t* AddOver(uint64_t offset, uint64_t numReplace, uint64_t numBytes);
         /// remove a chunk of data from the Block, return number of bytes removed
         virtual uint64_t Remove(uint64_t offset, uint64_t numBytes) = 0;
+        /// Reverse (Transposes) the data at the offset
+        virtual uint8_t* Reverse(uint64_t offset, uint64_t numBytes);
         /// clear the Block (deletes content, keeps capacity)
         virtual void Clear() = 0;
 
@@ -110,6 +113,18 @@ namespace ContainersPP {
             Remove(offset + numBytes, numReplace - numBytes);
         else //add some
             AddInsert(offset + numReplace, numBytes - numReplace);
+        return Data(offset);
+    }
+    inline uint8_t* iBlockD::Reverse(uint64_t offset, uint64_t numBytes)
+    {
+        #ifdef DEFENSE
+        if (offset > Size())
+            return nullptr;
+        if (offset + numBytes > Size())
+            numBytes = Size() - offset;
+        #endif // DEFENSE
+       
+        std::reverse(Data(offset), Data(offset + numBytes));
         return Data(offset);
     }
 } // namespace

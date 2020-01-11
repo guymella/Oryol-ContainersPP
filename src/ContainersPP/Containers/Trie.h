@@ -56,15 +56,19 @@ public:
     /// test if an element exists
     bool Contains(const Types::KeyString& key) const;
     bool Contains(const char* key) const { return Contains(Types::MakeKey(key)); };
+    bool Contains(uint64_t key) const { return Contains(Types::MakeKey(key)); };
     /// find element
     const iBufferV* Find(const Types::KeyString& key) const;
     const iBufferV* Find(const char* key) const { return Find(Types::MakeKey(key)); };
+    const iBufferV* Find(uint64_t key) const { return Find(Types::MakeKey(key)); };
     /// add element
     iBufferV& GetOrAdd(const Types::KeyString& key);
     iBufferV& GetOrAdd(const char* key) { return GetOrAdd(Types::MakeKey(key)); };
+    iBufferV& GetOrAdd(uint64_t key) { return GetOrAdd(Types::MakeKey(key)); };
     /// erase element
     void Erase(const Types::KeyString& key) {}; //TODO::
     void Erase(const char* key) { return Erase(Types::MakeKey(key)); };
+    void Erase(uint64_t key) { return Erase(Types::MakeKey(key)); };
     
 private:
     static void InitializeNode(iBufferV& nodeBuffer);
@@ -95,7 +99,7 @@ inline const iBufferV* Trie::Find(const Types::KeyString& key) const
     const iBufferV* node = &allocator[0];
     uint8_t count = *node->Data();
     NodeKey* nk = (NodeKey*)node->Data(1);
-    const uint8_t* keyItr = key.begin();
+    const uint8_t* keyItr = key.Data();
     uint64_t tare = 0;
     //for each key
     for (int16_t i = 0; i < count; i++) {
@@ -143,7 +147,7 @@ inline iBufferV& Trie::GetOrAdd(const Types::KeyString& key)
     iBufferV* node = &allocator[NodeID];
     uint8_t count = *node->Data();
     NodeKey* nk = (NodeKey*)node->Data(1);
-    const uint8_t* keyItr = key.begin();
+    const uint8_t* keyItr = key.Data();
 
     //for each key
     for (uint8_t i = 0; i < count; i++) {
@@ -243,7 +247,7 @@ inline uint64_t Trie::PushDown(uint64_t nodeID, uint64_t index, uint64_t prefixL
     //copy the key
     uint64_t PostFixLen = nk->KeyLen - prefixLen;
     nk->KeyLen = prefixLen;
-    TypeVector<uint8_t> key;
+    Types::KeyString key;
     key.CopyBack(nk->Key() + prefixLen, PostFixLen);
     uint64_t ValID = nk->ValID;
     uint64_t PostID = nk->PostID;

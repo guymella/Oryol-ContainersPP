@@ -190,7 +190,7 @@ namespace ContainersPP {
 			//check name
 			for (size_t i = 0; i < labels.Size(); i++) {
 				const KeyString& c = labels[i];
-				const uint8_t* p = c.begin();
+				const uint8_t* p = c.Data();
 				if (c == name)
 					return i;
 			}

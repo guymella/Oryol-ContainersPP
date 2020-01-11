@@ -59,6 +59,7 @@ public:
     virtual void Clear() override;
 
 private:
+    void move(Buffer&& rhs);
     /// (re-)allocate buffer
     void alloc(uint64_t newCapacity,uint64_t offset = 0);
     /// destroy buffer
@@ -90,13 +91,9 @@ inline Buffer::Buffer(const Buffer& rhs)
 
 //------------------------------------------------------------------------------
 inline
-Buffer::Buffer(Buffer&& rhs) :
-size(rhs.size),
-capacity(rhs.capacity),
-data(rhs.data) {
-    rhs.size = 0;
-    rhs.capacity = 0;
-    rhs.data = nullptr;
+Buffer::Buffer(Buffer&& rhs) 
+{
+    move(std::move(rhs));
 }
 
 //------------------------------------------------------------------------------
@@ -113,6 +110,20 @@ inline void Buffer::Allocate(uint64_t newCapacity)
 inline void Buffer::operator=(const Buffer& rhs)
 {
     copy(rhs.Data(), rhs.Size());
+}
+
+inline void Buffer::move(Buffer&& rhs)
+{
+    #ifdef DEFENSE
+    if (data) destroy();
+    #endif // DEFENSE
+
+    size = rhs.size;
+    capacity = rhs.capacity;
+    data = rhs.data;
+    rhs.size = 0;
+    rhs.capacity = 0;
+    rhs.data = nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -147,12 +158,7 @@ inline void Buffer::destroy() {
 //------------------------------------------------------------------------------
 inline void Buffer::operator=(Buffer&& rhs) {
     destroy();
-    size = rhs.size;
-    capacity = rhs.capacity;
-    data = rhs.data;
-    rhs.size = 0;
-    rhs.capacity = 0;
-    rhs.data = nullptr;
+    move(std::move(rhs));
 }
 
 //------------------------------------------------------------------------------

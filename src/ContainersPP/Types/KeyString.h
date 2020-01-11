@@ -8,14 +8,14 @@
 
 
 #include "Types.h"
-#include "ContainersPP/Containers/TypeBuffer.h"
+#include "ContainersPP/Containers/Buffer.h"
 #include <cstring>
 
 namespace ContainersPP {
 	namespace Types {
 
 
-		typedef TypeVector<uint8_t> KeyString;
+		typedef Buffer KeyString;
 
 		static KeyString MakeKey(const char* key)
 		{
@@ -24,16 +24,35 @@ namespace ContainersPP {
 			return newKey;
 		}
 
+		static KeyString MakeKey(uint64_t key)
+		{
+			uint8_t* b = (uint8_t*)&key;
+			uint8_t* e = b + 7;
+			
+			if (is_big_endian())
+				while (*b == 0)
+					++b;
+			else
+				while (*e == 0)
+					--e;
+
+			KeyString newKey;
+			newKey.CopyBack(b, (e-b)+1);
+			if (!is_big_endian())
+				newKey.Reverse(0,newKey.Size());
+			return newKey;
+		}
+
 		static bool operator==(const KeyString& lhs, const KeyString& rhs) {
 			if (lhs.Size() != rhs.Size())
 				return false;
-			return !std::memcmp(lhs.begin(), rhs.begin(), lhs.Size());
+			return !std::memcmp(lhs.Data(), rhs.Data(), lhs.Size());
 		}
 
 		bool operator<(const KeyString& lhs, const KeyString& rhs) {
 			if (lhs.Size() != rhs.Size())
 				return false;
-			return std::memcmp(lhs.begin(), rhs.begin(), lhs.Size()) < 0;
+			return std::memcmp(lhs.Data(), rhs.Data(), lhs.Size()) < 0;
 		}
 
 		struct KeyCompare {
@@ -49,7 +68,7 @@ namespace ContainersPP {
 		};
 		inline KeyCompare::KeyCompare(const KeyString& lhs, const KeyString& rhs)
 		{
-			Compare(lhs.begin(), rhs.begin(), lhs.Size(), rhs.Size());
+			Compare(lhs.Data(), rhs.Data(), lhs.Size(), rhs.Size());
 		}
 		KeyCompare::KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
 		{

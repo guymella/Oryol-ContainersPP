@@ -121,6 +121,10 @@ namespace ContainersPP {
 
     inline void Block::move(Block&& rhs)
     {
+        #ifdef DEFENSE
+        if (data) destroy();
+        #endif // DEFENSE
+
         size = rhs.size;
         data = rhs.data;
         rhs.size = 0;

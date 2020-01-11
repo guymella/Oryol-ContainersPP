@@ -29,7 +29,7 @@ namespace ContainersPP {
         static const int32_t EndOfFile = -1;
         static const int32_t EndOfRange = -1;
 
-        bool is_big_endian(void)
+        bool is_big_endian()
         {
             union {
                 uint32_t i;
