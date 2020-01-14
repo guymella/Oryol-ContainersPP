@@ -19,8 +19,12 @@ fips_begin_module(ContainersPP)
         #StaticArray.h
         elementBuffer.h
         #InlineArray.h
+        Partition.h
+        Table.h
 		Trie.h
 		Allocator.h
+        Entity.h
+        EntityTable.h
     )
 
     fips_dir(Interfaces)
@@ -33,6 +37,11 @@ fips_begin_module(ContainersPP)
         iBlock.h
 		iBuffer.h
 		iTypeBuffer.h
+        iEntity.h
+        iEntityTable.h
+        iAllocator.h
+        iTable.h
+        iTrie.h
     )
 	
     fips_dir(Types)
