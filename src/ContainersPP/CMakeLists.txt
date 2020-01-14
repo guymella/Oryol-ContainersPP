@@ -22,6 +22,7 @@ fips_begin_module(ContainersPP)
         Partition.h
         Table.h
 		Trie.h
+        TypeTrie.h
 		Allocator.h
         Entity.h
         EntityTable.h
@@ -66,6 +67,8 @@ fips_begin_app(test cmdline)
             BufferTest.h
             elementBufferTest.h
             StructTest.h
+            TrieTest.h
+            TypeTrieTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
