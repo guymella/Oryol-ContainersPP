@@ -90,9 +90,8 @@ namespace ContainersPP {
         TYPE& InsertKey(iBufferV& nodeBuffer, uint8_t index, const Types::KeyString& key, uint64_t tare, TYPE&& Value, uint64_t PostID = 0);
         void InsertEmptyKey(iBufferV& nodeBuffer, uint8_t index, const Types::KeyString& key, uint64_t tare, uint64_t PostID = 0);
         uint64_t PushDown(uint64_t nodeID, uint64_t index, uint64_t prefixLen);
-        static uint64_t GetKeyOffset(const iBufferV& nodeBuffer, uint64_t index);
-         
-        TYPE DEBUG;
+        static uint64_t GetKeyOffset(const iBufferV& nodeBuffer, uint64_t index);       
+        
 
     };
 

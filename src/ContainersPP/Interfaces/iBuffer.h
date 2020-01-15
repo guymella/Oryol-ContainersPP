@@ -98,7 +98,7 @@ namespace ContainersPP {
         virtual void Clear() = 0;
     };
     
-    uint64_t ContainersPP::iBufferV::SpareBack() const
+    inline uint64_t iBufferV::SpareBack() const
     {
         return Capacity() - Size();
     }

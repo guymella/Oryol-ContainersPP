@@ -8,14 +8,24 @@
 //#include "ContainersPP/Types/Schema.h"
 //#include "ContainersPP/Types/BitPointer.h"
 #include "ContainersPP/Containers/TypeBuffer.h"
+#ifndef _PARTITION_DEF
 #include "ContainersPP/Containers/Partition.h"
+#endif // !_PARTITION_DEF
+
+
 #include "iAllocator.h"
 
+
+
+
 namespace ContainersPP {
+	//#ifndef _PARTITION_DEF
+	//class Partition;
+	//#endif // !_PARTITION_DEF
 	class iTable : public iAllocator {
 	public:
-		virtual iBlockD& operator[](uint64_t index) override { return Index()[index]; };
-		virtual const iBlockD& operator[](uint64_t index) const override { return Index()[index]; };
+		virtual iBlockD& operator[](uint64_t index) override;
+		virtual const iBlockD& operator[](uint64_t index) const override;
 
 		virtual uint64_t New() override;
 		virtual uint64_t New(uint64_t newSize) override;
@@ -30,7 +40,7 @@ namespace ContainersPP {
 		void IncrementPartitions(uint64_t index);
 		void DecrementPartitions(uint64_t index);
 		void UpdateOffsets(uint64_t index, int64_t offsetDelta);
-		uint64_t EndOffset() const { return Index().Back().Data(Index().Back().Size()) - Buffer().Data(); }
+		uint64_t EndOffset() const;
 
 		virtual TypeBuffer<Partition>& Index() = 0;
 		virtual const TypeBuffer<Partition>& Index() const = 0;
@@ -38,15 +48,17 @@ namespace ContainersPP {
 		virtual const iBlockD& Buffer() const = 0;
 	};	
 
-	uint64_t ContainersPP::iTable::New()
+	/*uint64_t ContainersPP::iTable::New()
 	{
 		Index().PushBack(Partition(this, Count(), EndOffset(), 0));
+		return Index().Size() - 1;
 	}
 
 	inline uint64_t iTable::New(uint64_t newSize)
 	{
 		Buffer().AddBack(newSize);
 		Index().PushBack(Partition(this, Count(), EndOffset(), newSize));
+		return Index().Size() - 1;
 	}
 
 	inline iBlockD& iTable::Insert(uint64_t index, uint64_t newSize)
@@ -61,7 +73,7 @@ namespace ContainersPP {
 	inline void iTable::Remove(uint64_t index)
 	{
 		Buffer().Remove(Index()[index].StartOffset, Index()[index].Size());		
-		UpdateOffsets(index + 1, -(Index()[index].Size()));
+		UpdateOffsets(index + 1, -(int64_t)(Index()[index].Size()));
 		Index().Erase(index);
 		DecrementPartitions(index);
 	}
@@ -85,7 +97,7 @@ namespace ContainersPP {
 		for (++index; index < Count(); ++index) {
 			Index()[index].StartOffset += offsetDelta;
 		}
-	}
+	}*/
 
 }//contanersPP
 

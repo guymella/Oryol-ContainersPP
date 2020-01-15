@@ -5,6 +5,10 @@
     @ingroup Core
     @brief growable memory buffer for raw data
 */
+
+#ifndef _TYPEBUFFER_DEFINED
+#define _TYPEBUFFER_DEFINED
+
 #include "ContainersPP/Containers/BufferDbl.h"
 #include "ContainersPP/Containers/Buffer.h"
 #include "ContainersPP/Containers/Block.h"
@@ -149,3 +153,5 @@ inline const iBufferD& TypeBuffer<TYPE>::Buffer() const {
 }
 
 } // namespace 
+
+#endif //defined

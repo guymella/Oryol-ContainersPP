@@ -4,6 +4,7 @@
     @file Core/Types.h
     @brief defines basic data types for Oryol
 */
+
 #include <stdint.h>
 
 namespace ContainersPP {
@@ -29,7 +30,8 @@ namespace ContainersPP {
         static const int32_t EndOfFile = -1;
         static const int32_t EndOfRange = -1;
 
-        bool is_big_endian()
+		
+        static bool is_big_endian()
         {
             union {
                 uint32_t i;
@@ -38,6 +40,7 @@ namespace ContainersPP {
 
             return bint.c[0] == 1;
         }
+		
 
 
 

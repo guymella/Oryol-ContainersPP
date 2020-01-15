@@ -15,6 +15,7 @@
 #include "UnitTests/StructTest.h"
 #include "UnitTests/TrieTest.h"
 #include "UnitTests/TypeTrieTest.h"
+#include "UnitTests/TableTest.h"
 
 //#include "Core/Containers/Array.h"
 //using namespace ContainersPP;
@@ -35,6 +36,7 @@ int main(void) {
 	CHECK(TestStruct());
 	CHECK(TestTrie());
 	CHECK(TestTypeTrie());
+	CHECK(TestTable());
 
 	//TODO:: Test Allcoator
 	//Allocator a1;

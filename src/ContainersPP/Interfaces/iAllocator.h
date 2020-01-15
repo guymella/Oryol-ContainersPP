@@ -2,6 +2,8 @@
 //  iAllocator.h
 //------------------------------------------------------------------------------
 
+#ifndef _IALLOCATOR_DEF
+#define _IALLOCATOR_DEF
 #include "iBlock.h"
 
 namespace ContainersPP {
@@ -23,3 +25,5 @@ namespace ContainersPP {
 	
 
 }//contanersPP
+
+#endif

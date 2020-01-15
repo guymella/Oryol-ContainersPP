@@ -5,6 +5,9 @@
     @ingroup Interfaces
     @brief interface for memory block
 */
+#ifndef _IBLOCK_DEF
+#define _IBLOCK_DEF
+
 #include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
@@ -91,7 +94,7 @@ namespace ContainersPP {
         Oryol::Memory::Copy(ptr, Data(offset), (int)numBytes);
     }
 
-    void ContainersPP::iBlockD::CopyBack(const uint8_t* data, uint64_t numBytes)
+    inline void ContainersPP::iBlockD::CopyBack(const uint8_t* data, uint64_t numBytes)
     {
         Oryol::Memory::Copy(data, AddBack(numBytes), (int)numBytes);
     }
@@ -128,3 +131,5 @@ namespace ContainersPP {
         return Data(offset);
     }
 } // namespace
+
+#endif

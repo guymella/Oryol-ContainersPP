@@ -19,7 +19,7 @@ fips_begin_module(ContainersPP)
         #StaticArray.h
         elementBuffer.h
         #InlineArray.h
-        Partition.h
+        Partition.h Partition.cpp
         Table.h
 		Trie.h
         TypeTrie.h
@@ -41,7 +41,7 @@ fips_begin_module(ContainersPP)
         iEntity.h
         iEntityTable.h
         iAllocator.h
-        iTable.h
+        iTable.h iTable.cpp
         iTrie.h
     )
 	
@@ -69,6 +69,7 @@ fips_begin_app(test cmdline)
             StructTest.h
             TrieTest.h
             TypeTrieTest.h
+            TableTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
