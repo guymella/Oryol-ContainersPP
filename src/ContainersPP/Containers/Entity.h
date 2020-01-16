@@ -14,22 +14,16 @@ namespace ContainersPP {
 	public:
 		Entity(Types::Schema* SchemaPointer);
 	protected:
-		virtual const Types::Schema& Schema() const override;
-		virtual Buffer& getBuffer(uint64_t index) override;
+		virtual const Types::Schema& Schema() const override { return *schemaPtr; }
+		virtual Buffer& getBuffer(uint64_t index) override { return buffers[index]; }
 	private:
 		Types::Schema* schemaPtr;
-		TypeBuffer<BufferPtr> buffers;
+		TypeBuffer<Buffer> buffers;
 	};
 
 	Entity::Entity(Types::Schema* SchemaPointer) : schemaPtr(SchemaPointer)
 	{
-		data.Push(schemaPtr->SizeOfFixed());
+		buffers.PushBack(Schema().SizeOfFixed());
 	}
-
-	inline Itr<uint8_t> Entity::FixedBegin(const size_t& offset)
-	{
-		return data.GetPartition(0).begin(offset);
-	}
-
 
 }//contanersPP

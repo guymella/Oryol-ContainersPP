@@ -32,9 +32,12 @@ uint64_t ContainersPP::iTable::New()
 
 	ContainersPP::iBlockD& ContainersPP::iTable::Insert(uint64_t index, uint64_t newSize)
 	{
-		Buffer().AddInsert(Index()[index].Data()-Buffer().Data(),newSize);
-		Index().Insert(index, Partition(this, index, EndOffset(), newSize));
-		UpdateOffsets(index + 1, newSize);
+		uint64_t pOffset = Index()[index].Data() - Buffer().Data();
+		Buffer().AddInsert(pOffset,newSize);
+		Index().Insert(index, Partition(this, index, pOffset, newSize));
+		for (uint64_t i = index +1; i < Count(); ++i) {
+			Index()[i].StartOffset += newSize;
+		}
 		IncrementPartitions(index + 1);
 		return Index()[index];
 	}
@@ -42,7 +45,7 @@ uint64_t ContainersPP::iTable::New()
 	void ContainersPP::iTable::Remove(uint64_t index)
 	{
 		Buffer().Remove(Index()[index].StartOffset, Index()[index].Size());		
-		UpdateOffsets(index + 1, -(int64_t)(Index()[index].Size()));
+		UpdateFollowingOffsets(index, -(int64_t)(Index()[index].Size()));
 		Index().Erase(index);
 		DecrementPartitions(index);
 	}
@@ -61,7 +64,7 @@ uint64_t ContainersPP::iTable::New()
 		}
 	}
 
-	void ContainersPP::iTable::UpdateOffsets(uint64_t index, int64_t offsetDelta)
+	void ContainersPP::iTable::UpdateFollowingOffsets(uint64_t index, int64_t offsetDelta)
 	{
 		for (++index; index < Count(); ++index) {
 			Index()[index].StartOffset += offsetDelta;

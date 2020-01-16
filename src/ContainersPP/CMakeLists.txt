@@ -24,6 +24,7 @@ fips_begin_module(ContainersPP)
 		Trie.h
         TypeTrie.h
 		Allocator.h
+        Coalator.h
         Entity.h
         EntityTable.h
     )

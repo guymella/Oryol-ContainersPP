@@ -55,6 +55,7 @@ namespace ContainersPP {
         virtual void Clear();
 
         friend class iTable;
+        friend class Coalator;
 	private:
 		iTable* table = 0;
 		uint64_t PartitionID = 0;

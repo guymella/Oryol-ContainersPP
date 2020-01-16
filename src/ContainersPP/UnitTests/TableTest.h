@@ -20,13 +20,46 @@ bool TestTable()
 	*(uint64_t*)tt[0].Data() = 0x05;
 	CHECK(tt[0].Size() == 8);
 	CHECK(tt[0].Data()[0] == 0x05);
-	uint64_t x = *(uint64_t*)tt[0].Data();
 	*tt[0].Data(7) = 0x06;
-	uint64_t xx = *(uint64_t*)tt[0].Data();
 	CHECK(*(uint64_t*)tt[0].Data() == 0x0600000000000005);
+	*(uint64_t*)tt[0].Data() = 0x05;
 
-	//TODO:: Test Blocks individually
+	tt.New(8);
+	CHECK(tt.Count() == 2);
+	*(uint64_t*)tt[1].Data() = 0x09;
+	CHECK(tt[1].Size() == 8);
+	CHECK(tt[0].Data()[0] == 0x05);
+	CHECK(tt[1].Data()[0] == 0x09);
+
+//uint64_t dbg = *(uint64_t*)tt[2].Data();
+
+
+	tt.Insert(1,8);
+	CHECK(tt.Count() == 3);
+	*(uint64_t*)tt[1].Data() = 0x01;
+	CHECK(tt[2].Size() == 8);
+	CHECK(tt[0].Data()[0] == 0x05);
+	CHECK(tt[1].Data()[0] == 0x01);
 	
+	CHECK(tt[2].Data()[0] == 0x09);
+
+	tt.Insert(1, 8);
+	CHECK(tt.Count() == 4);
+	*(uint64_t*)tt[1].Data() = 0x3;
+	CHECK(tt[3].Size() == 8);
+	CHECK(tt[0].Data()[0] == 0x05);
+	CHECK(tt[1].Data()[0] == 0x03);
+	CHECK(tt[2].Data()[0] == 0x01);
+	CHECK(tt[3].Data()[0] == 0x09);
+	
+	
+	tt.Remove(2);
+	CHECK(tt.Count() == 3);
+	CHECK(tt[0].Data()[0] == 0x05);
+	CHECK(tt[1].Data()[0] == 0x03);
+	CHECK(tt[2].Data()[0] == 0x09);
+
+	//TODO:: Test Partitions individually
 
 	return true;
 }

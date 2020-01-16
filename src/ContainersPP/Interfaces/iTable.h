@@ -27,19 +27,19 @@ namespace ContainersPP {
 		virtual iBlockD& operator[](uint64_t index) override;
 		virtual const iBlockD& operator[](uint64_t index) const override;
 
-		virtual uint64_t New() override;
-		virtual uint64_t New(uint64_t newSize) override;
-		virtual iBlockD& Insert(uint64_t index, uint64_t newSize);
-		virtual void Remove(uint64_t index);
+		uint64_t New() override;
+		uint64_t New(uint64_t newSize) override;
+		iBlockD& Insert(uint64_t index, uint64_t newSize);
+		void Remove(uint64_t index);
 
 		/// get number of buffers
-		virtual uint64_t Count() const override { return Index().Size(); };
+		uint64_t Count() const override { return Index().Size(); };
 
 		friend class Partition;
 	protected:
-		void IncrementPartitions(uint64_t index);
-		void DecrementPartitions(uint64_t index);
-		void UpdateOffsets(uint64_t index, int64_t offsetDelta);
+		virtual void IncrementPartitions(uint64_t index);
+		virtual void DecrementPartitions(uint64_t index);
+		virtual void UpdateFollowingOffsets(uint64_t index, int64_t offsetDelta);
 		uint64_t EndOffset() const;
 
 		virtual TypeBuffer<Partition>& Index() = 0;
