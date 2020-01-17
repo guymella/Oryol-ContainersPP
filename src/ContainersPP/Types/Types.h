@@ -31,17 +31,20 @@ namespace ContainersPP {
         static const int32_t EndOfRange = -1;
 
 		
-        static bool is_big_endian()
-        {
-            union {
-                uint32_t i;
-                char c[4];
-            } bint = { 0x01020304 };
+		static bool is_big_endian()
+		{
+			union {
+				uint32_t i;
+				char c[4];
+			} bint = { 0x01020304 };
 
-            return bint.c[0] == 1;
-        }
+			return bint.c[0] == 1;
+		};
 		
-
+		struct DataRange {
+			uint8_t* data;
+			uint64_t size;
+		};
 
 
 
@@ -152,6 +155,12 @@ namespace ContainersPP {
 
 			Val = 253, // undefined value stub. polymorphic base value
 			Poly = 254 //undefined object stub, pure polymorphic struct 
+		};
+
+		static uint64_t BASEDEFAULT[] = { 0,0,0,0,0,0,0,0 };
+
+		static uint8_t* DefaultOf(baseTypes type) {
+			return (uint8_t*)&BASEDEFAULT;
 		};
 
 		static size_t SizeOf(baseTypes type) {

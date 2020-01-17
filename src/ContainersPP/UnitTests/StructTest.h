@@ -2,10 +2,10 @@
 //  TableTest.h
 //  Test Table class.
 //------------------------------------------------------------------------------
-#include "ContainersPP/Types/schema.h"
-#include "ContainersPP/Types/BitPointer.h"
+//#include "ContainersPP/Types/schema.h"
+//#include "ContainersPP/Types/BitPointer.h"
 //#include "ContainersPP/Types/Entity.h"
-
+#include "ContainersPP/Containers/Entity.h"
 #include <assert.h>
 //#define CHECK assert
 
@@ -61,19 +61,45 @@ bool TestStruct()
 	CHECK(s.FindIndex("dingleCount") == 0);
 	
 
-	CHECK(s.AddAttribute(Types::MakeKey("dingleratio"), {Types::baseTypes::float64,0 }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingleratio"), {Types::baseTypes::uint64,0 }));
 	CHECK(!s.AddAttribute(Types::MakeKey("dingleratio"), { Types::baseTypes::float64,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingleletter"), {Types::baseTypes::chr,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("name"), { Types::baseTypes::String,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingles"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,1,0,0,0,0,0)}));
 	CHECK(s.AddAttribute(Types::MakeKey("dinglet"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,0,0,0,1,0,0) }));
-	CHECK(s.AddAttribute(Types::MakeKey("dingtime"), { Types::baseTypes::float32, Types::TypeDescr::setFLags(1,0,0,0,0,0,0) }));
-	CHECK(s.AddAttribute(Types::MakeKey("dingwimple"), { Types::baseTypes::uint128, Types::TypeDescr::setFLags(0,0,1,0,0,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingtime"), { Types::baseTypes::uint32, Types::TypeDescr::setFLags(1,0,0,0,0,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingwimple"), { Types::baseTypes::uint64, Types::TypeDescr::setFLags(0,0,1,0,0,0,0) }));
 
 	size_t size = s.SizeOfFixed();
+	CHECK(size == 18);
+	//Test Indexes	
+	CHECK(s.FindIndex("dingleCount") == 2);
+	CHECK(s.FindIndex("dingleratio") == 4);
+	CHECK(s.FindIndex("dingleletter") == 3);
+	CHECK(s.FindIndex("name") == 5);
+	CHECK(s.FindIndex("dingles") == 6);
+	CHECK(s.FindIndex("dinglet") == 7);
+	CHECK(s.FindIndex("dingtime") == 0);
+	CHECK(s.FindIndex("dingwimple") == 1);
 
-	CHECK(size == 14);
 
+	//TODO:: Test Offsets
+	//uint64_t dbg = s.GetOffset(s.FindIndex("dingles"));
+	CHECK(s.GetOffset(s.FindIndex("dingtime")) == 1);
+	CHECK(s.GetOffset(s.FindIndex("dingwimple")) == 8); //spare, offset = size
+	CHECK(s.GetOffset(s.FindIndex("dingleCount")) == 5);
+	CHECK(s.GetOffset(s.FindIndex("dingleletter")) == 9);
+	CHECK(s.GetOffset(s.FindIndex("dingleratio")) == 10);
+	CHECK(s.GetOffset(s.FindIndex("name")) == 1); //columnar offset is columnstore index
+	CHECK(s.GetOffset(s.FindIndex("dingles")) == 2);
+	CHECK(s.GetOffset(s.FindIndex("dinglet")) == 3);
+
+	//TODO:: Custom Defaults test
+	Buffer eb(s.SizeOfFixed());
+	s.WriteDefaults(eb);
+
+	
+	//bit pointer test
 	uint8_t set[3] = { 0,0,0 };
 	Types::BitItr<uint8_t,1> b(set);
 	b[0] = true;
@@ -88,8 +114,18 @@ bool TestStruct()
 	CHECK(!*b);
 	b += 1;
 	CHECK(*b);
+	
+	//TODO:: Test Entity
+	Entity e(&s);
 
-	//Entity s1(&s);
+	//CHECK GetValue
+	e.GetValue<uint32_t>("dingleCount")[0] = 12;
+	e.GetValue<double>("dingleratio")[0] = 55.55;
+	e.GetValue<uint8_t>("dingleletter")[0] = 11;
+
+	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
 
 	
 

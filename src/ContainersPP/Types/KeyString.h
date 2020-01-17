@@ -50,9 +50,10 @@ namespace ContainersPP {
 		}
 
 		bool operator<(const KeyString& lhs, const KeyString& rhs) {
-			if (lhs.Size() != rhs.Size())
-				return false;
-			return std::memcmp(lhs.Data(), rhs.Data(), lhs.Size()) < 0;
+			uint64_t size = rhs.Size();
+			if (lhs.Size() < rhs.Size())
+				size = lhs.Size();
+			return std::memcmp(lhs.Data(), rhs.Data(), size) < 0;
 		}
 
 		struct KeyCompare {

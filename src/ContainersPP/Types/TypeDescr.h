@@ -5,8 +5,8 @@
 #include "Types.h"
 #include "KeyString.h"
 
-#ifndef Included_TypeDescr_H
-#define Included_TypeDescr_H
+//#ifndef Included_TypeDescr_H
+//#define Included_TypeDescr_H
 
 namespace ContainersPP {
 	namespace Types {
@@ -144,6 +144,8 @@ namespace ContainersPP {
 			static uint8_t setFLags(bool nullable, bool Multiple, bool Sparse, bool Constrained, bool Derived, bool Cached, bool Subscribable);
 			TypeSequence getTypeSequence() const;
 
+			DataRange DefaultValue() const;
+
 		private:
 			void copy(const TypeDescr& rhs);
 			void move(TypeDescr&& rhs);
@@ -262,6 +264,14 @@ namespace ContainersPP {
 			}
 			return TypeSequence::Uncached;
 		}
+		inline DataRange TypeDescr::DefaultValue() const
+		{
+			auto c = constraints.Contains(MakeKey("DEFAULT"));
+			if (c)
+				return { c->Data(),c->Size() };
+
+			return { DefaultOf(type), SizeOf(type) };
+		}
 		inline void TypeDescr::copy(const TypeDescr& rhs)
 		{
 			type = rhs.type;
@@ -278,4 +288,4 @@ namespace ContainersPP {
 		}
 	};
 };
-#endif 
+//#endif 

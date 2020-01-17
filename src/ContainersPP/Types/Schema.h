@@ -2,7 +2,14 @@
 //  Schema.h
 //------------------------------------------------------------------------------
 
+#ifndef _SCHEMA_DEF
+#define _SCHEMA_DEF
+
+
+
+
 #include "TypeDescr.h"
+#include "BitPointer.h"
 
 //#include "Structures/Containers/SparseArray.h"
 
@@ -12,6 +19,9 @@ namespace ContainersPP {
 		class Schema {
 		public:
 			Schema() { init(); };
+
+			void WriteDefaults(iBlockD& MainBlock) const;
+
 			size_t SizeOfFixed();
 			size_t SizeOfFixed() const;
 			size_t SizeOfBools();
@@ -22,8 +32,14 @@ namespace ContainersPP {
 			size_t FindIndex(const KeyString& name) const;
 			size_t FindIndex(const char* name) const;
 			bool AddAttribute(const KeyString& name, Types::TypeDescr type);
-			bool AddAttribute(const char* name, Types::baseTypes type);
+			bool AddAttribute(const char* name, Types::baseTypes type);			
+
+			const TypeDescr& GetTypeDescr(uint64_t columnIndex) const { return types[columnIndex]; };
+			uint8_t* GetValuePointer(uint64_t columnIndex, iBlockD& MainBlock) const;
+			uint64_t GetOffset(uint64_t columnIndex) const { return offsets[columnIndex]; };
+
 		//private:
+			void RebuildOffsets();
 			size_t SequenceStart(TypeSequence seq) const;
 			void init();
 			size_t fixedSize = 0;
@@ -31,6 +47,7 @@ namespace ContainersPP {
 			TypeVector<size_t> Sequence;
 			TypeVector<KeyString> labels;
 			TypeVector<Types::TypeDescr> types;
+			TypeVector<uint64_t> offsets;
 			//SparseArray<Darivation> Darivations
 			//TypeVector<Types::Constraint> Constraints;
 			//SparseArray<Schema*> SubSchemas;
@@ -39,6 +56,59 @@ namespace ContainersPP {
 
 
 
+
+		inline void Schema::WriteDefaults(iBlockD& MainBlock) const
+		{
+			MainBlock.Clear();
+			MainBlock.AddBack(SizeOfFixed());
+
+			uint64_t index = 0;
+			//Write Default Null FLags
+			uint64_t Count = BlockCount(0);
+			BitItr<uint8_t,1> bi(MainBlock.Data());
+			for (index; index < Count; ++index) {
+					bi[index] = (bool)(types[index].constraints.Contains(MakeKey("DEFAULT")));
+					if (bi[index]) {//has non null default
+						DataRange df = types[index].DefaultValue();
+						MainBlock.CopyOver(offsets[index], df.size, df.data, df.size); //write the default value
+					}
+			}
+			//Write Default sparse FLags
+			Count += BlockCount(1);
+			for (index; index < Count; ++index) {
+				bi[index] = false; // alwais starts as false
+			}
+			//Write Default bool FLags
+			bi += Count;
+			Count += BlockCount(2);
+			for (index; index < Count; ++index) {
+				auto argp = types[index].constraints.Contains(MakeKey("FixedSize"));
+				uint64_t bits = 1;
+				
+				if (argp) //get bit count
+					bits = *((uint64_t*)(argp->begin()));
+				
+				if (types[index].constraints.Contains(MakeKey("DEFAULT"))) { //copy default bits
+					DataRange df = types[index].DefaultValue();
+					BitItr<uint8_t, 1> bd(df.data);
+					for (uint64_t i = 0; i < bits; ++i)
+						bi[i] = bd[i];
+				}
+				else {
+					for (uint64_t i = 0; i < bits; ++i)
+						bi[i] = false;
+				}
+
+				bi += bits;
+			}
+
+			Count += BlockCount(3);
+			for (index; index < Count; ++index) {
+				DataRange df = types[index].DefaultValue();
+				MainBlock.CopyOver(offsets[index], df.size, df.data, df.size); //write the default value
+			}
+
+		}
 
 		inline size_t Schema::SizeOfFixed()
 		{
@@ -49,6 +119,7 @@ namespace ContainersPP {
 
 			return fixedSize;
 		}
+
 
 		inline size_t Schema::SizeOfFixed() const
 		{
@@ -65,7 +136,7 @@ namespace ContainersPP {
 				Size += GetElmSize(i);
 
 			secEnd = SequenceStart(TypeSequence::Sparse);
-			for (size_t i = Sequence[TypeSequence::Nullable]; i < secEnd; i++)//null cols
+			for (size_t i = SequenceStart(TypeSequence::Nullable); i < secEnd; i++)//null cols
 				Size += GetElmSize(i);
 
 			return Size;
@@ -73,9 +144,9 @@ namespace ContainersPP {
 
 		inline size_t Schema::SizeOfBools()
 		{
-			size_t bools = BlockCount(0);
+			size_t bools = BlockCount(2);
 			size_t size = bools;
-			for (size_t i = 0; i < bools; i++) {
+			for (size_t i = BlockCount(0)+ BlockCount(1); i < bools; i++) {
 				auto argp = types[i].constraints.Contains(MakeKey("FixedSize"));
 				if (argp) {
 					size--;
@@ -87,9 +158,9 @@ namespace ContainersPP {
 
 		inline size_t Schema::SizeOfBools() const
 		{
-			size_t bools = BlockCount(0);
+			size_t bools = BlockCount(2);
 			size_t size = bools;
-			for (size_t i = 0; i < bools; i++) {
+			for (size_t i = BlockCount(0) + BlockCount(1); i < bools; i++) {
 				auto argp = types[i].constraints.Contains(MakeKey("FixedSize"));
 				if (argp) {
 					size--;
@@ -227,6 +298,9 @@ namespace ContainersPP {
 			types.Insert(seqStart, type);
 			Sequence[seq]++;
 
+			if (seq < Types::TypeSequence::Multi) //offsets changed
+				RebuildOffsets();
+
 			return true;
 		}
 
@@ -235,6 +309,87 @@ namespace ContainersPP {
 			Types::TypeDescr t;
 			t.type = type;
 			return AddAttribute(Types::MakeKey(name), t);
+		}
+
+		inline uint8_t* Schema::GetValuePointer(uint64_t columnIndex, iBlockD& MainBlock) const
+		{
+			Types::TypeDescr td = GetTypeDescr(columnIndex);
+			Types::TypeSequence ts = td.getTypeSequence();
+			if (ts < Types::TypeSequence::Columnar) { // is in mainblock	
+				if (ts < Types::TypeSequence::Sparse) {//nullable
+					//check null flags
+					BitItr<uint8_t, 1> itr(MainBlock.Data(), 0);
+					if (!itr[columnIndex]) 
+						return nullptr;
+					return MainBlock.Data(offsets[columnIndex]);
+				}
+				if (ts < Types::TypeSequence::Bool) {//Sparse
+					//check sparse flag
+					BitItr<uint8_t, 1> itr(MainBlock.Data(), 0);
+					if (!itr[columnIndex]) return nullptr;
+					//calculate sparse offset					
+					uint64_t offset = SizeOfFixed();//start at end of fixed
+					for (uint64_t i = BlockCount(0); i < columnIndex; i++) //for each sparse 
+						if (itr[i]) //if exists
+							offset += offsets[i]; //add its offset
+					return MainBlock.Data(offset);					
+				}
+				if (ts < Types::TypeSequence::Fixed) {//TODO::Bool
+					return nullptr; //use get BitPointer
+				}
+				if (ts < Types::TypeSequence::Columnar) { //fixed
+					return MainBlock.Data(offsets[columnIndex]);
+				}
+			}
+			return nullptr;
+		}
+
+		inline void Schema::RebuildOffsets()
+		{
+			offsets.Clear();			
+			offsets.AddBack(types.Size());
+
+			uint64_t offset = BlockCount(0) + BlockCount(1) + SizeOfBools();
+			offset = offset / 8 + (offset % 8 ? 1 : 0);
+
+			uint64_t index = 0;
+			//Write Null Offsets
+			uint64_t Count = BlockCount(0);
+			for (index; index < Count; ++index) {
+				offsets[index] = offset;
+				offset += GetElmSize(index);
+			}
+			//Write Default sparse FLags
+			Count += BlockCount(1);
+			for (index; index < Count; ++index) {
+				offsets[index] = GetElmSize(index);
+			}
+			//Write Default bool FLags
+			Count += BlockCount(2);
+			uint64_t boffset = BlockCount(0) + BlockCount(1);
+			for (index; index < Count; ++index) {
+				auto argp = types[index].constraints.Contains(MakeKey("FixedSize"));
+				uint64_t bits = 1;
+
+				if (argp) //get bit count
+					bits = *((uint64_t*)(argp->begin()));
+
+				offsets[index] = boffset;
+				boffset += bits;
+			}
+
+			Count += BlockCount(3);
+			for (index; index < Count; ++index) {
+				offsets[index] = offset;
+				offset += GetElmSize(index);
+			}
+
+			//colums, offsets start at 1
+			offset = 0;
+			for (index; index < offsets.Size(); ++index) {
+				offsets[index] = ++offset;
+			}
+
 		}
 
 		inline size_t Schema::SequenceStart(TypeSequence seq) const
@@ -255,3 +410,5 @@ namespace ContainersPP {
 
 	};// namspace Types
 }; //Namespace ContainersPP
+
+#endif // _SCHEMA_DEF
