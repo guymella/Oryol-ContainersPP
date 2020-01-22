@@ -28,6 +28,12 @@ namespace ContainersPP {
 	{
 		buffers.PushBack(Schema().SizeOfFixed());
 		Schema().WriteDefaults(MainBuffer());
+		//add column buffers
+		buffers.AddBack(Schema().SeperatedColumnCount());
+		//Write Culumnar defaults
+		uint64_t colend = Schema().SequenceStart(Types::TypeSequence::Multi);
+		for (uint64_t i = Schema().SequenceStart(Types::TypeSequence::Columnar); i < colend; i++)
+			buffers[Schema().GetOffset(i)].CopyBack(Schema().GetTypeDescr(i).DefaultValue().data, Schema().GetElmSize(i));
 	}
 
 	class EntityRef : public iEntity {

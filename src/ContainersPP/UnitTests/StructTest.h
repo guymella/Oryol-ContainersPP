@@ -19,7 +19,7 @@ bool TestStruct()
 	CHECK(!td.Nullable());
 	CHECK(!td.Multiple());
 	CHECK(!td.Sparse());
-	//CHECK(!td.CustomDefault());
+	CHECK(!td.Columnar());
 	CHECK(!td.Constrained());
 	CHECK(!td.Derived());
 	CHECK(!td.Cached());
@@ -31,7 +31,7 @@ bool TestStruct()
 	CHECK(td.Nullable());
 	CHECK(!td.Multiple());
 	CHECK(!td.Sparse());
-	//CHECK(td.CustomDefault());
+	CHECK(!td.Columnar());
 	CHECK(!td.Constrained());
 	CHECK(!td.Derived());
 	CHECK(!td.Cached());
@@ -65,23 +65,39 @@ bool TestStruct()
 	CHECK(!s.AddAttribute(Types::MakeKey("dingleratio"), { Types::baseTypes::float64,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingleletter"), {Types::baseTypes::chr,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingletruth"), { Types::baseTypes::boolean,0 }));
-	//CHECK(s.AddAttribute(Types::MakeKey("dingleflags"), { Types::baseTypes::boolean,0 }));
+	//CHECK(s.AddAttribute(Types::MakeKey("dingleflags"), { Types::baseTypes::boolean,0 }));//todo:: test multibool and fixed multi bool
 	CHECK(s.AddAttribute(Types::MakeKey("name"), { Types::baseTypes::String,0 }));
-	CHECK(s.AddAttribute(Types::MakeKey("dingles"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,1,0,0,0,0,0)}));
-	CHECK(s.AddAttribute(Types::MakeKey("dinglet"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,0,0,0,1,0,0) }));
-	CHECK(s.AddAttribute(Types::MakeKey("dingtime"), { Types::baseTypes::uint32, Types::TypeDescr::setFLags(1,0,0,0,0,0,0) }));
-	CHECK(s.AddAttribute(Types::MakeKey("dingwimple"), { Types::baseTypes::uint64, Types::TypeDescr::setFLags(0,0,1,0,0,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingles"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,1,0,0,0,0,0,0)}));
+	CHECK(s.AddAttribute(Types::MakeKey("dinglet"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,0,0,0,0,1,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingtime"), { Types::baseTypes::uint32, Types::TypeDescr::setFLags(1,0,0,0,0,0,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingwimple"), { Types::baseTypes::uint64, Types::TypeDescr::setFLags(0,0,1,0,0,0,0,0) }));
+	CHECK(s.AddAttribute(Types::MakeKey("dingzipper"), { Types::baseTypes::uint64, Types::TypeDescr::setFLags(0,0,0,1,0,0,0,0) }));
 
 	size_t size = s.SizeOfFixed();
 	CHECK(size == 18);
+	   
+	CHECK(s.SeperatedColumnCount() == 3);
+	//uint64_t dbg = s.BlockCount(3);
+	CHECK(s.BlockCount(0) == 1);
+	CHECK(s.BlockCount(1) == 1);
+	CHECK(s.BlockCount(2) == 1);
+	CHECK(s.BlockCount(3) == 3);
+	CHECK(s.BlockCount(4) == 1);
+	CHECK(s.BlockCount(5) == 0);//TODO:: test multi and fixed multi
+	CHECK(s.BlockCount(6) == 1);
+	CHECK(s.BlockCount(7) == 1);
+	CHECK(s.BlockCount(8) == 1);
+
+
 	//Test Indexes	
 	CHECK(s.FindIndex("dingletruth") == 2);
 	CHECK(s.FindIndex("dingleCount") == 3);
 	CHECK(s.FindIndex("dingleratio") == 5);
 	CHECK(s.FindIndex("dingleletter") == 4);
-	CHECK(s.FindIndex("name") == 6);
-	CHECK(s.FindIndex("dingles") == 7);
-	CHECK(s.FindIndex("dinglet") == 8);
+	CHECK(s.FindIndex("dingzipper") == 6);
+	CHECK(s.FindIndex("name") == 7);
+	CHECK(s.FindIndex("dingles") == 8);
+	CHECK(s.FindIndex("dinglet") == 9);
 	CHECK(s.FindIndex("dingtime") == 0);
 	CHECK(s.FindIndex("dingwimple") == 1);
 
@@ -94,9 +110,10 @@ bool TestStruct()
 	CHECK(s.GetOffset(s.FindIndex("dingleCount")) == 5);
 	CHECK(s.GetOffset(s.FindIndex("dingleletter")) == 9);
 	CHECK(s.GetOffset(s.FindIndex("dingleratio")) == 10);
-	CHECK(s.GetOffset(s.FindIndex("name")) == 1); //columnar offset is columnstore index
-	CHECK(s.GetOffset(s.FindIndex("dingles")) == 2);
-	CHECK(s.GetOffset(s.FindIndex("dinglet")) == 3);
+	CHECK(s.GetOffset(s.FindIndex("dingzipper")) == 1); //columnar, offset is columnstore index
+	CHECK(s.GetOffset(s.FindIndex("name")) == 2); 
+	CHECK(s.GetOffset(s.FindIndex("dingles")) == 3);
+	CHECK(s.GetOffset(s.FindIndex("dinglet")) == 4);
 
 	//TODO:: Custom Defaults test
 	Buffer eb(s.SizeOfFixed());
@@ -182,10 +199,26 @@ bool TestStruct()
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 
+	//CHECK GetValue "Columnar"
+	CHECK(e.GetValue<uint64_t>("dingzipper")[0] == 0); //Check Default
+	e.GetValue<uint64_t>("dingzipper")[0] = 151515;
+
+	CHECK(e.GetBool("dingletruth")[0]);
+	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
+	CHECK(e.GetValue<uint64_t>("dingzipper")[0] == 151515);
+
 	//Check GetVar
+	e.GetVar("name").CopyBack((const uint8_t*)"helloWorld", 10);
+	CHECK(e.GetVar("name").Data()[0] == 'h');
+
+	//Check GetMulti
 	//TODO::
 
-	//Check GetArray
+	//Check GetMultiVar
 	//TODO::
 
 

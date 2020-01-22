@@ -141,7 +141,7 @@ namespace ContainersPP {
 			void Cached(bool flag) { flags ^= (-(uint8_t)flag ^ flags) & (1UL << 6); };
 			void Subscribable(bool flag) { flags ^= (-(uint8_t)flag ^ flags) & (1UL << 7); };
 
-			static uint8_t setFLags(bool nullable, bool Multiple, bool Sparse, bool Constrained, bool Derived, bool Cached, bool Subscribable);
+			static uint8_t setFLags(bool nullable, bool Multiple, bool Sparse,bool Columnar, bool Constrained, bool Derived, bool Cached, bool Subscribable);
 			TypeSequence getTypeSequence() const;
 
 			DataRange DefaultValue() const;
@@ -156,11 +156,12 @@ namespace ContainersPP {
 			return (type == rhs.type && flags == rhs.flags);
 		}
 
-		uint8_t TypeDescr::setFLags(bool nullable, bool Multiple, bool Sparse, bool Constrained, bool Derived, bool Cached, bool Subscribable)
+		uint8_t TypeDescr::setFLags(bool nullable, bool Multiple, bool Sparse, bool Columnar, bool Constrained, bool Derived, bool Cached, bool Subscribable)
 		{
 			return ((uint8_t)nullable)
 				| ((uint8_t)Multiple << 1)
 				| ((uint8_t)Sparse << 2)
+				| ((uint8_t)Columnar << 3)
 				| ((uint8_t)Constrained << 4)
 				| ((uint8_t)Derived << 5)
 				| ((uint8_t)Cached << 6)
@@ -186,7 +187,10 @@ namespace ContainersPP {
 						}
 						else { //struct
 							if (!Multiple())
-								return Cached() ? TypeSequence::Cached : TypeSequence::Fixed;
+								if(Columnar())
+									return Cached() ? TypeSequence::CachedColumnar : TypeSequence::Columnar;
+								else
+									return Cached() ? TypeSequence::Cached : TypeSequence::Fixed;
 							else
 								return Cached() ? TypeSequence::CachedFixedMulti : TypeSequence::FixedMulti;
 

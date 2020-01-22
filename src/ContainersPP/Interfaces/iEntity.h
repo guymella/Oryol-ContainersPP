@@ -36,7 +36,9 @@ namespace ContainersPP {
 		void SetNull(const char* key) { SetNull(Types::MakeKey(key)); };
 
 		//const iBlockD* GetVar(uint64_t columnIndex) const;
-		//iBlockD* GetVar(uint64_t columnIndex);
+		iBlockD& GetVar(uint64_t columnIndex);
+		iBlockD& GetVar(const Types::KeyString key) { return GetVar(Schema().FindIndex(key)); };
+		iBlockD& GetVar(const char* key) { return GetVar(Types::MakeKey(key)); };
 
 		//template<typename TYPE>
 		//TODO:: const TypeBlockRef<TYPE> GetArray(uint64_t columnIndex) const;
@@ -82,6 +84,12 @@ namespace ContainersPP {
 	inline void iEntity::SetNull(uint64_t columnIndex)
 	{
 		Schema().SetColumnNull(columnIndex, MainBuffer());
+	}
+
+	inline iBlockD& iEntity::GetVar(uint64_t columnIndex)
+	{
+		o_assert_dbg(Schema().GetTypeDescr(columnIndex).getTypeSequence() == Types::TypeSequence::Var || Schema().GetTypeDescr(columnIndex).getTypeSequence() == Types::TypeSequence::CachedVar);
+		return ColumnBuffer(Schema().GetOffset(columnIndex));
 	}
 
 

@@ -26,6 +26,7 @@ namespace ContainersPP {
 			size_t SizeOfFixed() const;
 			size_t SizeOfBools();
 			size_t SizeOfBools() const;
+			uint64_t SeperatedColumnCount() const;
 			size_t GetElmSize(size_t index) const;
 			size_t BlockCount(uint8_t BlockIndex) const; //returns number of elements in the sequence block
 			size_t BlockCount(Types::TypeSequence start, uint8_t end) const; //returns number of elements in the sequence block
@@ -172,6 +173,11 @@ namespace ContainersPP {
 				}				
 			}
 			return size;
+		}
+
+		inline uint64_t Schema::SeperatedColumnCount() const
+		{
+			return BlockCount(4) + BlockCount(5) + BlockCount(6) + BlockCount(7);
 		}
 
 		inline size_t Schema::GetElmSize(size_t index) const
@@ -441,10 +447,10 @@ namespace ContainersPP {
 				offset += GetElmSize(index);
 			}
 
-			//colums, offsets start at 1
+			//colums, 
 			offset = 0;
 			for (index; index < offsets.Size(); ++index) {
-				offsets[index] = ++offset;
+				offsets[index] = ++offset; //offsets start at 1, 0 reserved for mainbuffer
 			}
 
 		}
