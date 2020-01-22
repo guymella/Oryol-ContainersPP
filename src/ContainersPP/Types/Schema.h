@@ -36,7 +36,11 @@ namespace ContainersPP {
 
 			const TypeDescr& GetTypeDescr(uint64_t columnIndex) const { return types[columnIndex]; };
 			uint8_t* GetValuePointer(uint64_t columnIndex, iBlockD& MainBlock) const;
+			BitItr<uint8_t,1> GetBoolPointer(uint64_t columnIndex, iBlockD& MainBlock) const;
 			uint64_t GetOffset(uint64_t columnIndex) const { return offsets[columnIndex]; };
+
+			uint8_t* SetColumnValue(uint64_t columnIndex, iBlockD& MainBlock) const;
+			void SetColumnNull(uint64_t columnIndex, iBlockD& MainBlock) const;
 
 		//private:
 			void RebuildOffsets();
@@ -342,6 +346,59 @@ namespace ContainersPP {
 				}
 			}
 			return nullptr;
+		}
+
+		inline BitItr<uint8_t, 1> Schema::GetBoolPointer(uint64_t columnIndex, iBlockD& MainBlock) const
+		{
+			o_assert_dbg(types[columnIndex].type == baseTypes::boolean);
+
+			BitItr<uint8_t, 1> bit(MainBlock.Data());
+			bit += GetOffset(columnIndex);
+
+			return bit;
+		}
+
+		inline uint8_t* Schema::SetColumnValue(uint64_t columnIndex, iBlockD& MainBlock) const
+		{
+			o_assert_dbg(GetTypeDescr(columnIndex).Nullable() || GetTypeDescr(columnIndex).Sparse());
+
+			Types::BitItr<uint8_t, 1> flag(MainBlock.Data());
+			flag += columnIndex;
+			if (GetTypeDescr(columnIndex).Sparse() && !flag[0]) {//need to insert the value into buffer
+				flag[0] = true;
+				BitItr<uint8_t, 1> itr(MainBlock.Data(), 0);
+				uint64_t offset = SizeOfFixed();//start at end of fixed
+				for (uint64_t i = BlockCount(0); i < columnIndex; i++) //for each sparse 
+					if (itr[i]) //if exists
+						offset += offsets[i]; //add its offset
+
+				//insert space for value
+				MainBlock.AddInsert(offset, offsets[columnIndex]); //invalidates bitItrs
+			} else
+				flag[0] = true;
+					   
+			return GetValuePointer(columnIndex, MainBlock);
+		}
+
+		inline void Schema::SetColumnNull(uint64_t columnIndex, iBlockD& MainBlock) const
+		{
+			o_assert_dbg(GetTypeDescr(columnIndex).Nullable() || GetTypeDescr(columnIndex).Sparse());
+
+			Types::BitItr<uint8_t, 1> flag(MainBlock.Data());
+			flag += columnIndex;
+			if (GetTypeDescr(columnIndex).Sparse() && flag[0]) {//need to remove the value from buffer
+				flag[0] = false;
+				BitItr<uint8_t, 1> itr(MainBlock.Data(), 0);
+				uint64_t offset = SizeOfFixed();//start at end of fixed
+				for (uint64_t i = BlockCount(0); i < columnIndex; i++) //for each sparse 
+					if (itr[i]) //if exists
+						offset += offsets[i]; //add its offset
+
+				//insert space for value
+				MainBlock.Remove(offset, offsets[columnIndex]); //invalidates bitItrs
+			}
+			else
+				flag[0] = false;			
 		}
 
 		inline void Schema::RebuildOffsets()
