@@ -226,7 +226,7 @@ namespace ContainersPP {
 					}
 				}
 				else { //Not Fixed Size
-					if (type > baseTypes::Struct || type <= baseTypes::LRef) { //var
+					if (type > baseTypes::Struct && type <= baseTypes::LRef) { //var
 						if (!Nullable()) {
 							if (!Multiple())
 								return Cached() ? TypeSequence::CachedVar : TypeSequence::Var;

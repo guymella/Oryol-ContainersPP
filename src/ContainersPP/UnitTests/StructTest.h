@@ -68,6 +68,7 @@ bool TestStruct()
 	//CHECK(s.AddAttribute(Types::MakeKey("dingleflags"), { Types::baseTypes::boolean,0 }));//todo:: test multibool and fixed multi bool
 	CHECK(s.AddAttribute(Types::MakeKey("name"), { Types::baseTypes::String,0 }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingles"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,1,0,0,0,0,0,0)}));
+	CHECK(s.AddAttribute(Types::MakeKey("dinglenums"), { Types::baseTypes::uint32, Types::TypeDescr::setFLags(0,1,0,0,0,0,0,0) }));
 	CHECK(s.AddAttribute(Types::MakeKey("dinglet"), { Types::baseTypes::String, Types::TypeDescr::setFLags(0,0,0,0,0,1,0,0) }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingtime"), { Types::baseTypes::uint32, Types::TypeDescr::setFLags(1,0,0,0,0,0,0,0) }));
 	CHECK(s.AddAttribute(Types::MakeKey("dingwimple"), { Types::baseTypes::uint64, Types::TypeDescr::setFLags(0,0,1,0,0,0,0,0) }));
@@ -77,13 +78,13 @@ bool TestStruct()
 	CHECK(size == 18);
 	   
 	CHECK(s.SeperatedColumnCount() == 3);
-	//uint64_t dbg = s.BlockCount(3);
+	//uint64_t dbg = s.BlockCount(5);
 	CHECK(s.BlockCount(0) == 1);
 	CHECK(s.BlockCount(1) == 1);
 	CHECK(s.BlockCount(2) == 1);
 	CHECK(s.BlockCount(3) == 3);
 	CHECK(s.BlockCount(4) == 1);
-	CHECK(s.BlockCount(5) == 0);//TODO:: test multi and fixed multi
+	CHECK(s.BlockCount(5) == 1);//TODO:: test multi and fixed multi
 	CHECK(s.BlockCount(6) == 1);
 	CHECK(s.BlockCount(7) == 1);
 	CHECK(s.BlockCount(8) == 1);
@@ -95,25 +96,28 @@ bool TestStruct()
 	CHECK(s.FindIndex("dingleratio") == 5);
 	CHECK(s.FindIndex("dingleletter") == 4);
 	CHECK(s.FindIndex("dingzipper") == 6);
-	CHECK(s.FindIndex("name") == 7);
-	CHECK(s.FindIndex("dingles") == 8);
-	CHECK(s.FindIndex("dinglet") == 9);
+	CHECK(s.FindIndex("dinglenums") == 7);
+	CHECK(s.FindIndex("name") == 8);
+	CHECK(s.FindIndex("dingles") == 9);
+	CHECK(s.FindIndex("dinglet") == 10);
 	CHECK(s.FindIndex("dingtime") == 0);
 	CHECK(s.FindIndex("dingwimple") == 1);
 
 
 	//TODO:: Test Offsets
-	//uint64_t dbg = s.GetOffset(s.FindIndex("dingles"));
+	//uint64_t dbg = s.GetOffset(s.FindIndex("dinglet"));
 	CHECK(s.GetOffset(s.FindIndex("dingtime")) == 1); //nullable, flag offset is column index
 	CHECK(s.GetOffset(s.FindIndex("dingwimple")) == 8); //sparse, offset = size
 	CHECK(s.GetOffset(s.FindIndex("dingletruth")) == 2); //bool, offset is in bits
 	CHECK(s.GetOffset(s.FindIndex("dingleCount")) == 5);
 	CHECK(s.GetOffset(s.FindIndex("dingleletter")) == 9);
 	CHECK(s.GetOffset(s.FindIndex("dingleratio")) == 10);
+	
 	CHECK(s.GetOffset(s.FindIndex("dingzipper")) == 1); //columnar, offset is columnstore index
-	CHECK(s.GetOffset(s.FindIndex("name")) == 2); 
-	CHECK(s.GetOffset(s.FindIndex("dingles")) == 3);
-	CHECK(s.GetOffset(s.FindIndex("dinglet")) == 4);
+	CHECK(s.GetOffset(s.FindIndex("dinglenums")) == 2);
+	CHECK(s.GetOffset(s.FindIndex("name")) == 3); 
+	CHECK(s.GetOffset(s.FindIndex("dingles")) == 0); //Multivar, offset is allocators index
+	//CHECK(s.GetOffset(s.FindIndex("dinglet")) == 5);
 
 	//TODO:: Custom Defaults test
 	Buffer eb(s.SizeOfFixed());
@@ -217,11 +221,21 @@ bool TestStruct()
 
 	//Check GetMulti
 	//TODO::
+	CHECK(e.GetMulti<uint32_t>("dinglenums").Size() == 0);
+	e.GetMulti<uint32_t>("dinglenums").PushBack(606);
+	e.GetMulti<uint32_t>("dinglenums").PushBack(607);
+	CHECK(e.GetMulti<uint32_t>("dinglenums").Size() == 2);
 
 	//Check GetMultiVar
-	//TODO::
-
-
+	CHECK(e.GetMultiVar("dingles").Count() == 0);
+	CHECK(e.GetMultiVar("dingles").New(10) == 0); 
+	CHECK(e.GetMultiVar("dingles").Count() == 1);
+	CHECK(e.GetMultiVar("dingles")[0].Size() == 0);
+	e.GetMultiVar("dingles")[0].CopyBack((const uint8_t*)"helloWorld", 10);
+	e.GetMultiVar("dingles")[e.GetMultiVar("dingles").New(11)].CopyBack((const uint8_t*)"hello2World", 11);
+	CHECK(e.GetMultiVar("dingles").Count() == 2);
+	CHECK(e.GetMultiVar("dingles")[0].Size() == 10);
+	CHECK(e.GetMultiVar("dingles")[1].Size() == 11);
 
 	return true;
 }

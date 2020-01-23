@@ -66,9 +66,13 @@ struct BufferPtr {
 class CoAllocator : public iAllocator {
 public:
     /// default constructor
+    CoAllocator() {};
     CoAllocator(Allocator* ParentAllocator) : allocator(ParentAllocator) {};
     /// Copy constructor
-    CoAllocator(const CoAllocator& rhs);
+    CoAllocator(const CoAllocator& rhs) {//TODO:: Copy Buffers, make new index with copies
+        _index = rhs._index;
+        allocator = rhs.allocator;
+    }
     /// move constructor
     CoAllocator(CoAllocator&& rhs) { 
         _index = std::move(rhs._index);
@@ -77,6 +81,16 @@ public:
     };
     /// destructor
     //~Allocator();
+    void operator=(CoAllocator&& rhs) {
+        _index = std::move(rhs._index);
+        allocator = rhs.allocator;
+        rhs.allocator = nullptr;
+    };
+
+    void operator=(const CoAllocator& rhs) {
+        _index = rhs._index;
+        allocator = rhs.allocator;
+    };
 
     virtual Buffer& operator[](uint64_t index) override { return (*allocator)[_index[index]]; };
     virtual const Buffer& operator[](uint64_t index) const override { return (*allocator)[_index[index]]; };
@@ -88,7 +102,7 @@ public:
     virtual uint64_t Count() const override { return _index.Size(); };
     
 private:
-    Allocator* allocator;
+    Allocator* allocator = 0;
     TypeVector<uint64_t> _index;
 };
 

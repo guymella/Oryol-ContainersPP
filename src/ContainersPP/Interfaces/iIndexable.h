@@ -89,7 +89,7 @@ namespace ContainersPP {
 	inline void iEditable<TYPE>::Swap(const uint64_t& indexA, const uint64_t& indexB)
 	{
 		TYPE tmp = (*this)[indexA];
-		(*this)[indexA] = (*this)[indexB];
+		(*this)[indexA] = std::move((*this)[indexB]);
 		(*this)[indexB] = tmp;
 	}
 

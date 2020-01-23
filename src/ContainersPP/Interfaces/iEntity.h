@@ -41,8 +41,17 @@ namespace ContainersPP {
 		iBlockD& GetVar(const char* key) { return GetVar(Types::MakeKey(key)); };
 
 		//template<typename TYPE>
-		//TODO:: const TypeBlockRef<TYPE> GetArray(uint64_t columnIndex) const;
+		//TODO:: const TypeBlockRef<TYPE> GetMulti(uint64_t columnIndex) const;
+		template<typename TYPE>
+		TypeBlockRef<TYPE> GetMulti(uint64_t columnIndex);
+		template<typename TYPE>
+		TypeBlockRef<TYPE> GetMulti(const Types::KeyString key) { return GetMulti<TYPE>(Schema().FindIndex(key)); };
+		template<typename TYPE>
+		TypeBlockRef<TYPE> GetMulti(const char* key) { return GetMulti<TYPE>(Types::MakeKey(key)); };
 
+		iAllocator& GetMultiVar(uint64_t columnIndex);
+		iAllocator& GetMultiVar(const Types::KeyString key) { return GetMultiVar(Schema().FindIndex(key)); };
+		iAllocator& GetMultiVar(const char* key) { return GetMultiVar(Types::MakeKey(key)); };
 		
 		//void SetVar(uint64_t columnIndex, const iBlockD& value);
 	protected:
@@ -50,6 +59,7 @@ namespace ContainersPP {
 		virtual iBlockD& MainBuffer() = 0;
 		virtual uint8_t* Columnar(uint64_t index) = 0;
 		virtual iBlockD& ColumnBuffer(uint64_t index) = 0;
+		virtual iAllocator& ColumnAllocator(uint64_t index) = 0;
 	};
 
 	template<typename TYPE>
@@ -76,6 +86,13 @@ namespace ContainersPP {
 		new (ptr) TYPE(value);
 	}
 
+	template<typename TYPE>
+	inline TypeBlockRef<TYPE> iEntity::GetMulti(uint64_t columnIndex)
+	{
+		o_assert_dbg(Schema().GetTypeDescr(columnIndex).getTypeSequence() >= Types::TypeSequence::Multi && Schema().GetTypeDescr(columnIndex).getTypeSequence() < Types::TypeSequence::Var);
+		return TypeBlockRef<TYPE>(&ColumnBuffer(Schema().GetOffset(columnIndex)));
+	}
+
 	Types::BitItr<uint8_t, 1> ContainersPP::iEntity::GetBool(uint64_t columnIndex)
 	{
 		return Schema().GetBoolPointer(columnIndex, MainBuffer());
@@ -90,6 +107,11 @@ namespace ContainersPP {
 	{
 		o_assert_dbg(Schema().GetTypeDescr(columnIndex).getTypeSequence() == Types::TypeSequence::Var || Schema().GetTypeDescr(columnIndex).getTypeSequence() == Types::TypeSequence::CachedVar);
 		return ColumnBuffer(Schema().GetOffset(columnIndex));
+	}
+
+	inline iAllocator& iEntity::GetMultiVar(uint64_t columnIndex)
+	{
+		return ColumnAllocator(Schema().GetOffset(columnIndex));
 	}
 
 

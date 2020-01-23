@@ -7,7 +7,7 @@
 //#include "ContainersPP/Types/Schema.h"
 //#include "ContainersPP/Types/BitPointer.h"
 //#include "TypeBuffer.h"
-//#include "Allocator.h"
+#include "Allocator.h"
 
 namespace ContainersPP {
 
@@ -19,17 +19,24 @@ namespace ContainersPP {
 		virtual iBlockD& MainBuffer() override { return buffers[0]; }
 		virtual uint8_t* Columnar(uint64_t index) { return buffers[index].Data(); }
 		virtual iBlockD& ColumnBuffer(uint64_t index) { return buffers[index]; };
+		virtual iAllocator& ColumnAllocator(uint64_t index) override { return allocators[index]; };
 	private:
 		Types::Schema* schemaPtr;
-		TypeBuffer<Buffer> buffers;
+		Allocator buffers;
+		TypeBuffer<CoAllocator> allocators;
 	};
 
 	Entity::Entity(Types::Schema* SchemaPointer) : schemaPtr(SchemaPointer)
 	{
-		buffers.PushBack(Schema().SizeOfFixed());
+		buffers.New(Schema().SizeOfFixed());
 		Schema().WriteDefaults(MainBuffer());
 		//add column buffers
-		buffers.AddBack(Schema().SeperatedColumnCount());
+		for (uint64_t i = 0; i < Schema().SeperatedColumnCount();i++)
+			buffers.New();
+
+		//add multivar allocators
+		for (uint64_t i = 0; i < Schema().BlockCount(7); i++)
+			allocators.PushBack(CoAllocator(&buffers));
 		//Write Culumnar defaults
 		uint64_t colend = Schema().SequenceStart(Types::TypeSequence::Multi);
 		for (uint64_t i = Schema().SequenceStart(Types::TypeSequence::Columnar); i < colend; i++)

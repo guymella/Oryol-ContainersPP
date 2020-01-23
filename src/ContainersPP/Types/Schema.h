@@ -177,7 +177,7 @@ namespace ContainersPP {
 
 		inline uint64_t Schema::SeperatedColumnCount() const
 		{
-			return BlockCount(4) + BlockCount(5) + BlockCount(6) + BlockCount(7);
+			return BlockCount(4) + BlockCount(5) + BlockCount(6);
 		}
 
 		inline size_t Schema::GetElmSize(size_t index) const
@@ -410,7 +410,7 @@ namespace ContainersPP {
 		inline void Schema::RebuildOffsets()
 		{
 			offsets.Clear();			
-			offsets.AddBack(types.Size());
+			offsets.AddBack(SequenceStart(TypeSequence::Uncached));
 
 			uint64_t offset = BlockCount(0) + BlockCount(1) + SizeOfBools();
 			offset = offset / 8 + (offset % 8 ? 1 : 0);
@@ -449,8 +449,15 @@ namespace ContainersPP {
 
 			//colums, 
 			offset = 0;
-			for (index; index < offsets.Size(); ++index) {
+			uint64_t multivars = SequenceStart(TypeSequence::MultiVar);
+			for (index; index < multivars; ++index) {
 				offsets[index] = ++offset; //offsets start at 1, 0 reserved for mainbuffer
+			}
+
+			//multiVar Offsets, 
+			offset = 0;			
+			for (index; index < offsets.Size(); ++index) {
+				offsets[index] = offset++;
 			}
 
 		}

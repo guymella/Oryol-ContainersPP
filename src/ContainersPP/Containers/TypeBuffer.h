@@ -72,6 +72,61 @@ private:
 
 
 
+template <typename TYPE>
+class TypeBlockRef : public iTypeBlock<TYPE> {
+public:
+    TypeBlockRef(iBlockD* referencedBuffer) : buffer(referencedBuffer) {};
+    TypeBlockRef(const TypeBlockRef& rhs) : buffer(rhs.buffer) {};
+    TypeBlockRef(TypeBlockRef&& rhs) : buffer(rhs.buffer) { rhs.buffer = nullptr; };
+    ~TypeBlockRef() {};
+    /// MoveAssign
+    virtual void operator=(TypeBlockRef&& rhs) { buffer = rhs.buffer; rhs.buffer = nullptr; };
+    /// CopyAssign
+    virtual void operator=(const TypeBlockRef& rhs) { buffer = rhs.buffer; };
+protected:
+    virtual iBlockD& Buffer() override { return *buffer; };
+    virtual const iBlockD& Buffer() const override { return *buffer; };
+private:
+    iBlockD* buffer;
+};
+
+template <typename TYPE>
+class TypeVectorRef : public iTypeVector<TYPE> {
+public:
+    TypeVectorRef(iBufferV* referencedBuffer) : buffer(referencedBuffer) {};
+    TypeVectorRef(const TypeVectorRef& rhs) : buffer(rhs.buffer) {};
+    TypeVectorRef(TypeVectorRef&& rhs) : buffer(rhs.buffer) { rhs.buffer = nullptr; };
+    ~TypeVectorRef() { Clear(); };
+    /// CopyAssign
+    virtual void operator=(TypeVectorRef&& rhs) { buffer = rhs.buffer; rhs.buffer = nullptr;};
+    /// CopyAssign
+    virtual void operator=(const TypeVectorRef& rhs) { buffer = rhs.buffer; };
+protected:
+    virtual iBufferV& Buffer() override { return *buffer; };
+    virtual const iBufferV& Buffer() const override { return *buffer; };
+private:
+    iBufferV* buffer;
+};
+
+template <typename TYPE>
+class TypeBufferRef : public iTypeBuffer<TYPE> {
+public:
+    TypeBufferRef(iBufferD* referencedBuffer) : buffer(referencedBuffer){};
+    TypeBufferRef(const TypeBufferRef& rhs) : buffer(rhs.buffer) {};
+    TypeBufferRef(TypeBufferRef&& rhs) : buffer(rhs.buffer) { rhs.buffer = nullptr; };
+    ~TypeBufferRef() { Clear(); };
+    /// MoveAssign
+    virtual void operator=(TypeBufferRef&& rhs) { buffer = rhs.buffer; rhs.buffer = nullptr; };
+    /// CopyAssign
+    virtual void operator=(const TypeBufferRef& rhs) { buffer = rhs.buffer; };
+protected:
+    virtual iBufferD& Buffer() override { return *buffer; };
+    virtual const iBufferD& Buffer() const override { return *buffer; };
+private:
+    iBufferD* buffer;
+};
+
+
 
 template<typename TYPE>
 inline const iBlockD& TypeBlock<TYPE>::Buffer() const {
