@@ -2,6 +2,9 @@
 //  iEntity.h
 //------------------------------------------------------------------------------
 
+#ifndef _IENTITY_DEF
+#define _IENTITY_DEF
+
 #include "ContainersPP/Types/Schema.h"
 //#include "ContainersPP/Types/BitPointer.h"
 #include "TypeBuffer.h"
@@ -116,3 +119,5 @@ namespace ContainersPP {
 
 
 }//contanersPP
+
+#endif

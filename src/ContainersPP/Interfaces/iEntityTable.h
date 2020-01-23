@@ -2,6 +2,9 @@
 //  iEntityTable.h
 //------------------------------------------------------------------------------
 
+#ifndef _IENTITYTABLE_DEF
+#define _IENTITYTABLE_DEF
+
 #include "ContainersPP/Types/Schema.h"
 //#include "ContainersPP/Types/BitPointer.h"
 //#include "TypeBuffer.h"
@@ -13,19 +16,26 @@ namespace ContainersPP {
 	class iEntityTable {
 	public:
 
-		iBlockD& GetEntityMainBuffer(uint64_t EntityID);
-		const iBlockD& GetEntityMainBuffer(uint64_t EntityID) const;
+		virtual uint64_t Insert() = 0;
 
-		iBlockD& GetEntityColumnBuffer(uint64_t EntityID, uint64_t ColumnIndex);
-		const iBlockD& GetEntityColumnBuffer(uint64_t EntityID, uint64_t ColumnIndex) const;
 
-		uint8_t* GetEntityColumn(uint64_t EntityID, uint64_t ColumnIndex);
-		const uint8_t* GetEntityColumn(uint64_t EntityID, uint64_t ColumnIndex) const;
+		virtual iBlockD& GetEntityMainBuffer(uint64_t EntityID) = 0;
+		virtual const iBlockD& GetEntityMainBuffer(uint64_t EntityID) const = 0;
 
-		const Types::Schema& Schema() const;
+		virtual uint8_t* GetEntityColumn(uint64_t EntityID, uint64_t ColumnIndex) = 0;
+		virtual const uint8_t* GetEntityColumn(uint64_t EntityID, uint64_t ColumnIndex) const = 0;
+
+		virtual iBlockD& GetEntityColumnBuffer(uint64_t EntityID, uint64_t ColumnIndex) = 0;
+		virtual const iBlockD& GetEntityColumnBuffer(uint64_t EntityID, uint64_t ColumnIndex) const = 0;
+
+		virtual iAllocator& GetEntityColumnAllocator(uint64_t EntityID, uint64_t ColumnIndex) = 0;
+		virtual const iAllocator& GetEntityColumnAllocator(uint64_t EntityID, uint64_t ColumnIndex) const = 0;
+
+		virtual const Types::Schema& Schema() const = 0;
 	protected:
-		iAllocator& MainBuffers();
-		Coalator& ColumnBuffers(uint64_t ColumnIndex);		
+		//iAllocator& MainBuffers();
+		//iAllocator& ColumnBuffers(uint64_t ColumnIndex);
+		//iAllocator& ColumnAllocators(uint64_t ColumnIndex);
 	private:
 		//Types::Schema* schemaPtr;
 
@@ -36,3 +46,5 @@ namespace ContainersPP {
 
 
 }//contanersPP
+
+#endif

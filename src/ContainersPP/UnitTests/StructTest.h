@@ -5,7 +5,9 @@
 //#include "ContainersPP/Types/schema.h"
 //#include "ContainersPP/Types/BitPointer.h"
 //#include "ContainersPP/Types/Entity.h"
+#include "ContainersPP/Containers/EntityTable.h"
 #include "ContainersPP/Containers/Entity.h"
+
 #include <assert.h>
 //#define CHECK assert
 
@@ -236,6 +238,136 @@ bool TestStruct()
 	CHECK(e.GetMultiVar("dingles").Count() == 2);
 	CHECK(e.GetMultiVar("dingles")[0].Size() == 10);
 	CHECK(e.GetMultiVar("dingles")[1].Size() == 11);
+
+
+
+	EntityTable t(&s);
+	CHECK(t.Count() == 0);
+	CHECK(t.Insert() == 0);
+	CHECK(t.Count() == 1);
+	CHECK(t.Insert() == 1);
+	CHECK(t.Count() == 2);
+
+	auto r = t[1];
+
+	//CHECK GetValue
+	r.GetValue<uint32_t>("dingleCount")[0] = 12;
+	r.GetValue<double>("dingleratio")[0] = 55.55;
+	r.GetValue<uint8_t>("dingleletter")[0] = 11;
+
+	CHECK(!r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingwimple") == nullptr);
+
+	//Check GetBool
+	r.GetBool("dingletruth")[0] = true;
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingwimple") == nullptr);
+
+	//Check SetValue
+	r.SetValue<uint32_t>("dingtime", 101);
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime")[0] == 101);
+	CHECK(r.GetValue<uint64_t>("dingwimple") == nullptr);
+
+	r.SetValue<uint32_t>("dingwimple", 202);
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime")[0] == 101);
+	CHECK(r.GetValue<uint64_t>("dingwimple")[0] == 202);
+
+	//Check SetNull
+	r.SetNull("dingtime");
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingwimple")[0] == 202);
+
+	r.SetNull("dingwimple");
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingwimple") == nullptr);
+
+	//CHECK GetValue "Columnar"
+	CHECK(r.GetValue<uint64_t>("dingzipper")[0] == 0); //Check Default
+	r.GetValue<uint64_t>("dingzipper")[0] = 151515;
+
+	CHECK(r.GetBool("dingletruth")[0]);
+	CHECK(r.GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(r.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(r.GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(r.GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingwimple") == nullptr);
+	CHECK(r.GetValue<uint64_t>("dingzipper")[0] == 151515);
+
+	//Check GetVar
+	r.GetVar("name").CopyBack((const uint8_t*)"helloWorld", 10);
+	CHECK(r.GetVar("name").Data()[0] == 'h');
+
+	//Check GetMulti
+	//TODO::
+	CHECK(r.GetMulti<uint32_t>("dinglenums").Size() == 0);
+	r.GetMulti<uint32_t>("dinglenums").PushBack(606);
+	r.GetMulti<uint32_t>("dinglenums").PushBack(607);
+	CHECK(r.GetMulti<uint32_t>("dinglenums").Size() == 2);
+
+	//Check GetMultiVar
+	CHECK(r.GetMultiVar("dingles").Count() == 0);
+	CHECK(r.GetMultiVar("dingles").New(10) == 0);
+	CHECK(r.GetMultiVar("dingles").Count() == 1);
+	CHECK(r.GetMultiVar("dingles")[0].Size() == 0);
+	r.GetMultiVar("dingles")[0].CopyBack((const uint8_t*)"helloWorld", 10);
+	r.GetMultiVar("dingles")[r.GetMultiVar("dingles").New(11)].CopyBack((const uint8_t*)"hello2World", 11);
+	CHECK(r.GetMultiVar("dingles").Count() == 2);
+	CHECK(r.GetMultiVar("dingles")[0].Size() == 10);
+	CHECK(r.GetMultiVar("dingles")[1].Size() == 11);
+
+
+
+
+	CHECK(t[1].GetBool("dingletruth")[0]);
+	CHECK(t[1].GetValue<uint32_t>("dingleCount")[0] == 12);
+	CHECK(t[1].GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(t[1].GetValue<uint8_t>("dingleletter")[0] == 11);
+	CHECK(t[1].GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(t[1].GetValue<uint64_t>("dingwimple") == nullptr);
+	CHECK(t[1].GetValue<uint64_t>("dingzipper")[0] == 151515);
+	CHECK(t[1].GetVar("name").Data()[0] == 'h');
+	CHECK(t[1].GetMultiVar("dingles").Count() == 2);
+	CHECK(t[1].GetMultiVar("dingles")[0].Size() == 10);
+	CHECK(t[1].GetMultiVar("dingles")[1].Size() == 11);
+
+	CHECK(!t[0].GetBool("dingletruth")[0]);
+	CHECK(t[0].GetValue<uint32_t>("dingleCount")[0] == 0);
+	CHECK(t[0].GetValue<double>("dingleratio")[0] == 0);
+	CHECK(t[0].GetValue<uint8_t>("dingleletter")[0] == 0);
+	CHECK(t[0].GetValue<uint32_t>("dingtime") == nullptr);
+	CHECK(t[0].GetValue<uint64_t>("dingwimple") == nullptr);
+	CHECK(t[0].GetValue<uint64_t>("dingzipper")[0] == 0);
+	CHECK(t[0].GetVar("name").Size() == 0);
+	CHECK(t[0].GetMultiVar("dingles").Count() == 0);
 
 	return true;
 }
