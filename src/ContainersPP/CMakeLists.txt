@@ -27,6 +27,7 @@ fips_begin_module(ContainersPP)
         Coalator.h
         Entity.h
         EntityTable.h
+        FileBlock.h
     )
 
     fips_dir(Interfaces)
@@ -71,6 +72,7 @@ fips_begin_app(test cmdline)
             TrieTest.h
             TypeTrieTest.h
             TableTest.h
+            FileBlockTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()

@@ -17,6 +17,7 @@
 #include "UnitTests/TrieTest.h"
 #include "UnitTests/TypeTrieTest.h"
 #include "UnitTests/TableTest.h"
+#include "UnitTests/FileBlockTest.h"
 
 
 
@@ -40,6 +41,10 @@ int main(void) {
 	CHECK(TestTrie());
 	CHECK(TestTypeTrie());
 	CHECK(TestTable());
+	CHECK(TestFileBlock());
+
+
+
 
 	//TODO:: Test Allcoator
 	Allocator a1;
