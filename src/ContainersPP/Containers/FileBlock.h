@@ -16,6 +16,7 @@ namespace ContainersPP {
     class FileBlock : public Block {
     public:
         /// default constructor
+        FileBlock() {};
         FileBlock(const char* FileName) { 
             CopyFileName(FileName);
             Read();

@@ -59,8 +59,9 @@ private:
 inline FileAllocator::FileAllocator(const char* AllocationFolder)
 {
     uint64_t len = std::strlen(AllocationFolder);
-    folderName = (char*)Oryol::Memory::Alloc(len + 9);
-    Oryol::Memory::Copy(AllocationFolder, folderName, len);    
+    folderName = (char*)Oryol::Memory::Alloc((int)len + 9);
+    Oryol::Memory::Copy(AllocationFolder, folderName, (int)len);  
+    folderName[len] = 0;
 }
 
 uint64_t ContainersPP::FileAllocator::New()
@@ -125,17 +126,23 @@ inline bool FileAllocator::Delete(uint64_t BlockID)
 inline uint64_t FileAllocator::NextID(uint64_t lastID) const
 {
     uint64_t len = std::strlen(folderName);
-    char* fname = (char* )Oryol::Memory::Alloc(len + 9);
-    Oryol::Memory::Copy(folderName, fname, len);
+    char* fname = (char* )Oryol::Memory::Alloc((int)len + 9);
+    Oryol::Memory::Copy(folderName, fname, (int)len);
     FILE* pFile = nullptr;
+    bool exists;
     do {
-        fclose(pFile);
-        Types::n2hexstr(++lastID, fname + len);
+        exists = false;
+        if (buffers.Contains(++lastID)) {
+            exists = true;
+            continue;
+        }
+        //check folder
+        Types::n2hexstr(lastID, fname + len);
         #pragma warning(suppress : 4996)
         pFile = fopen(fname, "rb");
-    } while (pFile);
+    } while (exists || (pFile && fclose(pFile)));
         
-    fclose(pFile);   
+    //fclose(pFile);   
     
     return lastID;
 }
@@ -154,65 +161,65 @@ inline uint64_t FileAllocator::NextID(uint64_t lastID) const
 //};
 
 
-
-
-class CoAllocator : public iAllocator {
-public:
-    /// default constructor
-    CoAllocator() {};
-    CoAllocator(Allocator* ParentAllocator) : allocator(ParentAllocator) {};
-    /// Copy constructor
-    CoAllocator(const CoAllocator& rhs) {//TODO:: Copy Buffers, make new index with copies
-        _index = rhs._index;
-        allocator = rhs.allocator;
-    }
-    /// move constructor
-    CoAllocator(CoAllocator&& rhs) { 
-        _index = std::move(rhs._index);
-        allocator = rhs.allocator;
-        rhs.allocator = nullptr;
-    };
-    /// destructor
-    //~Allocator();
-    void operator=(CoAllocator&& rhs) {
-        _index = std::move(rhs._index);
-        allocator = rhs.allocator;
-        rhs.allocator = nullptr;
-    };
-
-    void operator=(const CoAllocator& rhs) {
-        _index = rhs._index;
-        allocator = rhs.allocator;
-    };
-
-    virtual Buffer& operator[](uint64_t index) override { return (*allocator)[_index[index]]; };
-    virtual const Buffer& operator[](uint64_t index) const override { return (*allocator)[_index[index]]; };
-
-    virtual uint64_t New() override ;
-    virtual uint64_t New(uint64_t newSize) override;
-
-    /// get number of buffers
-    virtual uint64_t Count() const override { return _index.Size(); };
-    
-private:
-    Allocator* allocator = 0;
-    TypeVector<uint64_t> _index;
-};
-
-uint64_t ContainersPP::CoAllocator::New()
-{
-    uint64_t newID = Count();
-    _index.PushBack(allocator->New());
-    return newID;
-}
-
-inline uint64_t CoAllocator::New(uint64_t newSize)
-{
-    uint64_t newID = Count();
-    _index.PushBack(allocator->New(newSize));
-    return newID;
-}
-
+//
+//
+//class CoAllocator : public iAllocator {
+//public:
+//    /// default constructor
+//    CoAllocator() {};
+//    CoAllocator(Allocator* ParentAllocator) : allocator(ParentAllocator) {};
+//    /// Copy constructor
+//    CoAllocator(const CoAllocator& rhs) {//TODO:: Copy Buffers, make new index with copies
+//        _index = rhs._index;
+//        allocator = rhs.allocator;
+//    }
+//    /// move constructor
+//    CoAllocator(CoAllocator&& rhs) { 
+//        _index = std::move(rhs._index);
+//        allocator = rhs.allocator;
+//        rhs.allocator = nullptr;
+//    };
+//    /// destructor
+//    //~Allocator();
+//    void operator=(CoAllocator&& rhs) {
+//        _index = std::move(rhs._index);
+//        allocator = rhs.allocator;
+//        rhs.allocator = nullptr;
+//    };
+//
+//    void operator=(const CoAllocator& rhs) {
+//        _index = rhs._index;
+//        allocator = rhs.allocator;
+//    };
+//
+//    virtual Buffer& operator[](uint64_t index) override { return (*allocator)[_index[index]]; };
+//    virtual const Buffer& operator[](uint64_t index) const override { return (*allocator)[_index[index]]; };
+//
+//    virtual uint64_t New() override ;
+//    virtual uint64_t New(uint64_t newSize) override;
+//
+//    /// get number of buffers
+//    virtual uint64_t Count() const override { return _index.Size(); };
+//    
+//private:
+//    Allocator* allocator = 0;
+//    TypeVector<uint64_t> _index;
+//};
+//
+//uint64_t ContainersPP::CoAllocator::New()
+//{
+//    uint64_t newID = Count();
+//    _index.PushBack(allocator->New());
+//    return newID;
+//}
+//
+//inline uint64_t CoAllocator::New(uint64_t newSize)
+//{
+//    uint64_t newID = Count();
+//    _index.PushBack(allocator->New(newSize));
+//    return newID;
+//}
+//
 
 
 } // namespace Oryol

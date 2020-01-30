@@ -19,6 +19,7 @@
 #include "UnitTests/TableTest.h"
 #include "UnitTests/FileBlockTest.h"
 #include "UnitTests/AllocatorTest.h"
+#include "UnitTests/FileAllocatorTest.h"
 
 
 
@@ -44,13 +45,9 @@ int main(void) {
 	CHECK(TestTable());
 	CHECK(TestFileBlock());
 	CHECK(TestAllocator());
-	
+	CHECK(TestFileAllocator());
 
 
-
-	
-
-	//sometimes i impress myself
 
 	return 0;
 }

@@ -149,5 +149,20 @@ bool TestTypeTrie()
 	CHECK(ti.Contains(0x100000));
 	CHECK(ti.Find(0x100000)[0] == 20);
 
+
+	//TEST Erase;
+	ti.Erase(0x1000000505);
+
+	CHECK(ti.Contains(0x100000050222));
+	CHECK(ti.Find(0x100000050222)[0] == 25);
+	CHECK(ti.Contains(0x1000));
+	CHECK(ti.Find(0x1000)[0] == 24);
+	CHECK(!ti.Contains(0x1000000505));
+	CHECK(ti.Find(0x1000000505)==nullptr);
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)[0] == 20);
+
+	//TODO:: test erase value from non leaf node.
+	
 	return true;
 }

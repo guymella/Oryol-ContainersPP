@@ -76,7 +76,7 @@ namespace ContainersPP {
         TYPE& GetOrAdd(const char* key) { return GetOrAdd(Types::MakeKey(key)); };
         TYPE& GetOrAdd(uint64_t key) { return GetOrAdd(Types::MakeKey(key)); };
         /// erase element
-        virtual void Erase(const Types::KeyString& key) {}; //TODO::
+        virtual void Erase(const Types::KeyString& key); //TODO::
         void Erase(const char* key) { return Erase(Types::MakeKey(key)); };
         void Erase(uint64_t key) { return Erase(Types::MakeKey(key)); };
     
@@ -115,6 +115,8 @@ namespace ContainersPP {
 
             if (*checkItr < *keyItr) {
                 nk = nk->Next(); //get next nodekey
+                /*if ((uint8_t*)nk - node->Data() > node->Size())
+                    return nullptr;*/
                 continue;
             }
             if (*checkItr == *keyItr) {//at least partial match
@@ -240,7 +242,71 @@ inline TYPE& iTrie<TYPE>::GetOrAdd(const Types::KeyString& key)
         return InsertNewKey(NodeID, i, key, keyItr - key.Data());
     } // no matches insert at end
     return InsertNewKey(NodeID, count, key, keyItr - key.Data());
-};
+}
+template<typename TYPE>
+inline void iTrie<TYPE>::Erase(const Types::KeyString& key)
+{
+    iBufferV* node = &Nodes()[0];
+    uint8_t count = *node->Data();
+    TypeKey<TYPE>* nk = (TypeKey<TYPE>*)node->Data(1);
+    const uint8_t* keyItr = key.Data();
+    uint64_t tare = 0;
+    //for each key
+    for (int16_t i = 0; i < count; i++) {
+        const uint8_t* checkItr = nk->Key();
+
+        if (*checkItr < *keyItr) {
+            nk = nk->Next(); //get next nodekey
+            continue;
+        }
+        if (*checkItr == *keyItr) {//at least partial match
+            
+            //compare the keys
+            //prefetch next node (Cache Hack)
+            uint64_t* postIDptr = nk->PostID();
+
+            Types::KeyCompare c(checkItr, keyItr, nk->KeyLen, key.Size() - tare);
+            if (c.Equal()) { // found
+                if (postIDptr) {
+                    //has posts only delete Value;
+                    if (nk->HasValue()) {//remove the value
+                        node->Remove((uint8_t*)nk->Value() - node->Data(), sizeof(TYPE));
+                        nk->flags &= 0x02;
+                    }
+                    return;
+                }
+                //DELETE NK
+                node->Remove((uint8_t*)nk - node->Data(), (uint8_t*)(nk->Next()) - (uint8_t*)nk);
+                node->Data()[0]--;
+                //TODO:: if node only has 1 key then recombine with parent.
+                return;
+            }
+                                   
+            
+            if (postIDptr) {
+                //TODO:: this can be done in spawned thread
+                node = &Nodes()[*postIDptr];
+                count = *node->Data();
+            }
+
+           
+            if (!c.lhsPostfix) {//full match ck check posts
+                if (!node)//no posts exists
+                    return;
+                keyItr += c.commonPrefix;
+                tare += c.commonPrefix;
+                nk = (TypeKey<TYPE>*)node->Data(1);
+                i = -1;
+                continue; //restart loop on new Node;
+            }
+            else //not a match
+                return;
+        }
+        return;
+    }
+    return;
+}
+;
 
 
 template<typename TYPE>

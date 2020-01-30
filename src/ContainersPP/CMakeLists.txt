@@ -76,6 +76,7 @@ fips_begin_app(test cmdline)
             TableTest.h
             FileBlockTest.h
             AllocatorTest.h
+            FileAllocatorTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
