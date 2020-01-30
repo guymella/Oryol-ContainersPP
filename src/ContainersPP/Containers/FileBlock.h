@@ -6,7 +6,7 @@
     @brief growable memory Block for raw data
 */
 
-//#include "Core/Memory/Memory.h"
+#include "Core/Memory/Memory.h"
 //#include "BlockStatic.h"
 #include "Block.h"
 #include <stdio.h>
@@ -16,7 +16,17 @@ namespace ContainersPP {
     class FileBlock : public Block {
     public:
         /// default constructor
-        FileBlock(const char* FileName) : filename(FileName) { Read(); };
+        FileBlock(const char* FileName) { 
+            CopyFileName(FileName);
+            Read();
+        };
+        FileBlock(const char* foldername, uint64_t FileID) { 
+            uint64_t len = std::strlen(foldername);
+            filename = (char*)Oryol::Memory::Alloc((int)len +9);
+            Oryol::Memory::Copy(foldername, filename, (int)len);
+            Types::n2hexstr(FileID, filename+len);
+            Read();
+        };
         /// Copy construct
         //FileBlock(const FileBlock& rhs);
         /// Copy construct
@@ -38,30 +48,40 @@ namespace ContainersPP {
         uint64_t Read();
         bool Delete();
     protected:
+        void CopyFileName(const char* FileName);
        
     private:
-        const char * filename;
+        char * filename = 0;
     };
 
     inline FileBlock::FileBlock(FileBlock&& rhs)
-    {
-        filename = rhs.filename;
-        Block::move(std::move(rhs));
+    {         
+         if (rhs.filename) {
+             CopyFileName(rhs.filename);
+             Block::move(std::move(rhs));
+             Oryol::Memory::Free(rhs.filename);
+             rhs.filename = nullptr;
+         }
     }
 
     inline FileBlock::~FileBlock()
     {
-        if (filename)
+        if (filename) {
             Save();
-        Block::~Block();
-        filename = nullptr;
+            Oryol::Memory::Free(filename);
+            filename = nullptr;
+        }
+        Block::~Block();       
     }
 
     inline void FileBlock::operator=(FileBlock&& rhs)
     {
-        filename = rhs.filename;
-        Block::move(std::move(rhs));
-        rhs.filename = nullptr;
+        if (rhs.filename) {
+            CopyFileName(rhs.filename);
+            Block::move(std::move(rhs));
+            Oryol::Memory::Free(rhs.filename);
+            rhs.filename = nullptr;
+        }
     }
 
     inline bool ContainersPP::FileBlock::Save()
@@ -111,6 +131,15 @@ namespace ContainersPP {
         Clear();
         //remove(filename);
         return !remove(filename);
+    }
+
+    inline void FileBlock::CopyFileName(const char* FileName)
+    {
+        if (filename)
+            Oryol::Memory::Free(filename);
+        uint64_t strSize = std::strlen(FileName) + 1;
+        filename = (char*)Oryol::Memory::Alloc((int)strSize);
+        Oryol::Memory::Copy(FileName, filename, (int)strSize);
     }
 
 } // namespace Oryol

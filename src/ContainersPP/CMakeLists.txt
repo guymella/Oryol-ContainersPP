@@ -28,6 +28,8 @@ fips_begin_module(ContainersPP)
         Entity.h
         EntityTable.h
         FileBlock.h
+        FileAllocator.h
+        Catalogue.h
     )
 
     fips_dir(Interfaces)
@@ -73,6 +75,7 @@ fips_begin_app(test cmdline)
             TypeTrieTest.h
             TableTest.h
             FileBlockTest.h
+            AllocatorTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
