@@ -1,15 +1,16 @@
 //------------------------------------------------------------------------------
 //  BitPointer.h
 //------------------------------------------------------------------------------
-
+#ifndef Included_BitRef_H
+#define Included_BitRef_H
 //#include "Interfaces/iIterator.h"
 #include "Types.h"
 
 namespace ContainersPP {
 	namespace Types {
-		template <typename TYPE, uint8_t SIZE>
+		template < typename TYPE, uint8_t SIZE, typename PTR = uint8_t* >
 		struct BitRef {
-			uint8_t* Address;
+			PTR Address;
 			uint8_t Offset;
 
 			void operator=(TYPE rhs);
@@ -24,11 +25,12 @@ namespace ContainersPP {
 			TYPE operator-=(int64_t increment);
 			TYPE operator-(int64_t increment) const;
 			operator TYPE ();
-			static BitRef<TYPE, SIZE> Increment(BitRef<TYPE, SIZE> lhs, const size_t& offset);
-			static BitRef<TYPE, SIZE> Decrement(BitRef<TYPE, SIZE> lhs, const size_t& offset);
-			static BitRef<TYPE, SIZE> Move(const BitRef<TYPE, SIZE>& lhs, const int64_t& offset);
-		private:
+			static BitRef< TYPE, SIZE, PTR> Increment(BitRef< TYPE, SIZE, PTR> lhs, const size_t& offset);
+			static BitRef< TYPE, SIZE, PTR> Decrement(BitRef< TYPE, SIZE, PTR> lhs, const size_t& offset);
+			static BitRef< TYPE, SIZE, PTR> Move(const BitRef< TYPE, SIZE, PTR>& lhs, const int64_t& offset);
 			TYPE Value() const;
+		private:
+			
 		};
 
 		template <typename TYPE, uint8_t SIZE>
@@ -52,14 +54,14 @@ namespace ContainersPP {
 		};
 
 
-		template<typename TYPE, uint8_t SIZE>
-		inline BitRef<TYPE, SIZE>::operator TYPE()
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline BitRef< TYPE, SIZE, PTR>::operator TYPE()
 		{
 			return Value();
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline BitRef<TYPE, SIZE> BitRef<TYPE, SIZE>::Increment(BitRef<TYPE, SIZE> ref, const size_t& offset)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline BitRef< TYPE, SIZE, PTR> BitRef< TYPE, SIZE, PTR>::Increment(BitRef< TYPE, SIZE, PTR> ref, const size_t& offset)
 		{
 			size_t bits = (offset * SIZE) + ref.Offset;
 			ref.Address += bits / 8;
@@ -67,8 +69,8 @@ namespace ContainersPP {
 			return ref;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline BitRef<TYPE, SIZE> BitRef<TYPE, SIZE>::Decrement(BitRef<TYPE, SIZE> ref, const size_t& offset)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline BitRef< TYPE, SIZE, PTR> BitRef< TYPE, SIZE, PTR>::Decrement(BitRef< TYPE, SIZE, PTR> ref, const size_t& offset)
 		{
 			size_t bits = (SIZE * offset);
 			ref.Address -= bits / 8;
@@ -82,21 +84,21 @@ namespace ContainersPP {
 			return ref;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline BitRef<TYPE, SIZE> BitRef<TYPE, SIZE>::Move(const BitRef<TYPE, SIZE>& lhs, const int64_t& offset)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline BitRef< TYPE, SIZE, PTR> BitRef< TYPE, SIZE, PTR>::Move(const BitRef< TYPE, SIZE, PTR>& lhs, const int64_t& offset)
 		{
 			return (offset > 0) ? Increment(lhs, offset) : Decrement(lhs, -offset);
 		}
 
 
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::Value() const
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::Value() const
 		{
 			uint8_t bitsleft = SIZE;
 
 			TYPE rtn = 0;
-			uint8_t* adr = Address;
+			PTR adr = Address;
 			//uint8_t off = Offset;
 
 			//uint8_t tmp = 0xff;
@@ -122,8 +124,8 @@ namespace ContainersPP {
 			return rtn;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline void BitRef<TYPE, SIZE>::operator=(TYPE rhs)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline void BitRef< TYPE, SIZE, PTR>::operator=(TYPE rhs)
 		{
 			uint8_t bitsleft = SIZE;
 
@@ -162,71 +164,77 @@ namespace ContainersPP {
 			}
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline bool BitRef<TYPE, SIZE>::operator==(const TYPE& rhs) const
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline bool BitRef< TYPE, SIZE, PTR>::operator==(const TYPE& rhs) const
 		{
 			return (TYPE)(*this) == rhs;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline bool BitRef<TYPE, SIZE>::operator!=(const TYPE& rhs) const
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline bool BitRef< TYPE, SIZE, PTR>::operator!=(const TYPE& rhs) const
 		{
 			return !((*this) == rhs);
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator++()
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator++()
 		{
 			return (*this) += 1;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator++(int)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator++(int)
 		{
 			TYPE rtn = (*this);
 			(*this)++;
 			return rtn;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator--()
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator--()
 		{
 			return (*this) -= 1;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator--(int)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator--(int)
 		{
 			TYPE rtn = (*this);
 			(*this)--;
 			return rtn;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator+=(int64_t increment)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator+=(int64_t increment)
 		{
 			(*this) = (*this) + increment;
 			return (*this);
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator+(int64_t increment) const
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator+(int64_t increment) const
 		{
 			return Value() + (TYPE)increment;
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator-=(int64_t increment)
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator-=(int64_t increment)
 		{
 			(*this) = (*this) - increment;
 			return (*this);
 		}
 
-		template<typename TYPE, uint8_t SIZE>
-		inline TYPE BitRef<TYPE, SIZE>::operator-(int64_t increment) const
+		template< typename TYPE, uint8_t SIZE, typename PTR>
+		inline TYPE BitRef< TYPE, SIZE, PTR>::operator-(int64_t increment) const
 		{
 			return Value() - (TYPE)increment;
 		}
+
+
+
+		////////////////////////
+
+
 
 		template<typename TYPE, uint8_t SIZE>
 		inline BitItr<TYPE, SIZE>::BitItr(uint8_t* address, uint8_t offset)
@@ -269,3 +277,10 @@ namespace ContainersPP {
 
 	}
 }
+
+
+
+
+
+
+#endif

@@ -10,7 +10,7 @@
 #define Included_Object_H
 
 
-#include "ContainersPP/Interfaces/iObject.h"
+#include "Catalogue.h"
 #include "ContainersPP/Interfaces/iAllocator.h"
 
 namespace ContainersPP {
@@ -126,7 +126,6 @@ namespace ContainersPP {
             iBlockD* blockPtr;
         };
     };
-
 
 
 

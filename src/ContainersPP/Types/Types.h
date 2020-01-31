@@ -123,7 +123,9 @@ namespace ContainersPP {
 			octernion,
 			lateral,
 
-			Struct = 100,
+			Catalog = 100,
+			Struct = 101,
+			SchemaStruct = 102,
 
 			formal = 109, // formal symbolic language
 			informal = 110, // informal symbolic language

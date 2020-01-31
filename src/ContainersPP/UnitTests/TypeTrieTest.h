@@ -166,3 +166,134 @@ bool TestTypeTrie()
 	
 	return true;
 }
+
+
+bool TestCatTrie()
+{
+	//TODO:: Test Trie
+	CatTrie t;
+
+	////add first key
+	CHECK(!t.Contains("hello"));	
+	CatKey* p = t.Add("hello", CatValEnums::prm, { Types::uint64,20 });
+	CHECK(p->Value()->uint_64 == 20);
+	CHECK(t.Contains("hello"));	
+	CHECK(t.Find("hello")->Value()->uint_64 == 20);
+
+	// add different key
+	CHECK(!t.Contains("supdude"));
+	t.Add("supdude", CatValEnums::prm, { Types::uint64,21 });
+	CHECK(t.Contains("supdude"));
+	CHECK(t.Find("supdude")->Value()->uint_64 == 21);
+
+	//// add extending key
+	CHECK(!t.Contains("helloworld"));
+	t.Add("helloworld", CatValEnums::prm, { Types::uint64,22 }) ;
+	CHECK(t.Contains("helloworld"));
+	CHECK(t.Find("helloworld")->Value()->uint_64 == 22);
+	CHECK(t.Contains("hello"));
+	CHECK(t.Find("hello")->Value()->uint_64 == 20);
+
+	//// add Splitting key
+	CHECK(!t.Contains("sup"));
+	t.Add("sup", CatValEnums::prm, { Types::uint64,23 });
+	CHECK(t.Contains("sup"));
+	CHECK(t.Find("sup")->Value()->uint_64 == 23);
+	CHECK(t.Contains("supdude"));
+	CHECK(t.Find("supdude")->Value()->uint_64 == 21);
+
+	// split extended key
+	CHECK(!t.Contains("hell"));
+	t.Add("hell", CatValEnums::prm, { Types::uint64,24 });
+	CHECK(t.Contains("hell"));
+	CHECK(t.Find("hell")->Value()->uint_64 == 24);
+	CHECK(t.Contains("helloworld"));
+	CHECK(t.Find("helloworld")->Value()->uint_64 == 22);
+	CHECK(t.Contains("hello"));
+	CHECK(t.Find("hello")->Value()->uint_64 == 20);
+
+	// split split key
+	CHECK(!t.Contains("hellowombats"));
+	t.Add("hellowombats", CatValEnums::prm, { Types::uint64,25 });
+	CHECK(t.Contains("hellowombats"));
+	CHECK(t.Find("hellowombats")->Value()->uint_64 == 25);
+	CHECK(t.Contains("hell"));
+	CHECK(t.Find("hell")->Value()->uint_64 == 24);
+	CHECK(t.Contains("helloworld"));
+	CHECK(t.Find("helloworld")->Value()->uint_64 == 22);
+	CHECK(t.Contains("hello"));
+	CHECK(t.Find("hello")->Value()->uint_64 == 20);
+
+
+
+
+
+	CatTrie ti;
+
+	//add first key
+	CHECK(!ti.Contains(0x100000));
+	ti.Add(0x100000, CatValEnums::prm, { Types::uint64,20 });
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)->Value()->uint_64 == 20);
+
+	// add different key
+	CHECK(!ti.Contains(0x200000));
+	ti.Add(0x200000, CatValEnums::prm, { Types::uint64,21 });
+	CHECK(ti.Contains(0x200000));
+	CHECK(ti.Find(0x200000)->Value()->uint_64 == 21);
+
+	// add extending key
+	CHECK(!ti.Contains(0x1000000505));
+	ti.Add(0x1000000505, CatValEnums::prm, { Types::uint64,22 });
+	CHECK(ti.Contains(0x1000000505));
+	CHECK(ti.Find(0x1000000505)->Value()->uint_64 == 22);
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)->Value()->uint_64 == 20);
+
+	// add Splitting key
+	CHECK(!ti.Contains(0x20));
+	ti.Add(0x20, CatValEnums::prm, { Types::uint64,23 });
+	CHECK(ti.Contains(0x20));
+	CHECK(ti.Find(0x20)->Value()->uint_64 == 23);
+	CHECK(ti.Contains(0x200000));
+	CHECK(ti.Find(0x200000)->Value()->uint_64 == 21);
+
+	// split extended key
+	CHECK(!ti.Contains(0x1000));
+	ti.Add(0x1000, CatValEnums::prm, { Types::uint64,24 });
+	CHECK(ti.Contains(0x1000));
+	CHECK(ti.Find(0x1000)->Value()->uint_64 == 24);
+	CHECK(ti.Contains(0x1000000505));
+	CHECK(ti.Find(0x1000000505)->Value()->uint_64 == 22);
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)->Value()->uint_64 == 20);
+
+	// split split key
+	CHECK(!ti.Contains(0x100000050222));
+	ti.Add(0x100000050222, CatValEnums::prm, { Types::uint64,25 });
+	CHECK(ti.Contains(0x100000050222));
+	CHECK(ti.Find(0x100000050222)->Value()->uint_64 == 25);
+	CHECK(ti.Contains(0x1000));
+	CHECK(ti.Find(0x1000)->Value()->uint_64 == 24);
+	CHECK(ti.Contains(0x1000000505));
+	CHECK(ti.Find(0x1000000505)->Value()->uint_64 == 22);
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)->Value()->uint_64 == 20);
+
+
+	//TEST Erase;
+	ti.Erase(0x1000000505);
+
+	CHECK(ti.Contains(0x100000050222));
+	CHECK(ti.Find(0x100000050222)->Value()->uint_64 == 25);
+	CHECK(ti.Contains(0x1000));
+	CHECK(ti.Find(0x1000)->Value()->uint_64 == 24);
+	CHECK(!ti.Contains(0x1000000505));
+	CHECK(ti.Find(0x1000000505) == nullptr);
+	CHECK(ti.Contains(0x100000));
+	CHECK(ti.Find(0x100000)->Value()->uint_64 == 20);
+
+	//TODO:: test erase value from non leaf node.
+
+	return true;
+}

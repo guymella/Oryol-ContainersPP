@@ -41,6 +41,7 @@ int main(void) {
 
 	CHECK(TestStruct());
 	CHECK(TestTrie());
+	CHECK(TestCatTrie());
 	CHECK(TestTypeTrie());
 	CHECK(TestTable());
 	CHECK(TestFileBlock());

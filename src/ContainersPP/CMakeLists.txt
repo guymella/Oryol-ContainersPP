@@ -48,6 +48,7 @@ fips_begin_module(ContainersPP)
         iAllocator.h
         iTable.h iTable.cpp
         iTrie.h
+        iCatalogueTrie.h
         iObject.h iObject.cpp
     )
 	
