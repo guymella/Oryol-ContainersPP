@@ -152,8 +152,8 @@ bool TestStruct()
 
 	CHECK(!e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 
@@ -162,8 +162,8 @@ bool TestStruct()
 	
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 
@@ -172,8 +172,8 @@ bool TestStruct()
 
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime")[0] == 101);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 
@@ -181,8 +181,8 @@ bool TestStruct()
 
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime")[0] == 101);
 	CHECK(e.GetValue<uint64_t>("dingwimple")[0] == 202);
 
@@ -191,8 +191,8 @@ bool TestStruct()
 
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple")[0] == 202);
 
@@ -200,8 +200,8 @@ bool TestStruct()
 
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 
@@ -211,8 +211,8 @@ bool TestStruct()
 
 	CHECK(e.GetBool("dingletruth")[0]);
 	CHECK(e.GetValue<uint32_t>("dingleCount")[0] == 12);
-	CHECK(e.GetValue<double>("dingleratio")[0] = 55.55);
-	CHECK(e.GetValue<uint8_t>("dingleletter")[0] = 11);
+	CHECK(e.GetValue<double>("dingleratio")[0] == 55.55);
+	CHECK(e.GetValue<uint8_t>("dingleletter")[0] == 11);
 	CHECK(e.GetValue<uint32_t>("dingtime") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingwimple") == nullptr);
 	CHECK(e.GetValue<uint64_t>("dingzipper")[0] == 151515);

@@ -5,7 +5,8 @@
     @ingroup Core
     @brief growable memory buffer for raw data
 */
-#include "ContainersPP/Types/Types.h"
+#include "ContainersPP/Types/TypeDescr.h"
+#include "Object.h"
 //#include "Core/Assertion.h"
 //#include "Core/Memory/Memory.h"
 #include "FileBlock.h"
@@ -14,7 +15,8 @@
 
 namespace ContainersPP {
 
-class Catalogue  {
+    
+class Catalogue {
 public:
     Catalogue(const char* SystemRoot);
 

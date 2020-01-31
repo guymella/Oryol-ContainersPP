@@ -2,108 +2,40 @@
 //  KeyString.h
 //------------------------------------------------------------------------------
 
-#ifndef Included_Keys_H
-#define Included_Keys_H
+//#ifndef Included_Keys_H
+//#define Included_Keys_H
 
 
 
-#include "Types.h"
-#include "ContainersPP/Containers/TypeBuffer.h"
-#include <cstring>
+#include "KeyString.h"
 
-namespace ContainersPP {
-	namespace Types {
+//namespace ContainersPP {
+//	namespace Types {
+//			   		
+//		KeyCompare::KeyCompare(const KeyString& lhs, const KeyString& rhs)
+//		{
+//			Compare(lhs.Data(), rhs.Data(), lhs.Size(), rhs.Size());
+//		}
+//		KeyCompare::KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
+//		{
+//			Compare(lhs, rhs, lhsSize, rhsSize);
+//		}
+//
+//		void KeyCompare::Compare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
+//		{
+//			size_t compSize = (lhsSize < rhsSize) ? lhsSize : rhsSize;
+//
+//			while (*lhs == *rhs && commonPrefix < compSize)
+//				commonPrefix++, lhs++, rhs++;
+//
+//			lhsPostfix = lhsSize - commonPrefix;
+//			rhsPostfix = rhsSize - commonPrefix;
+//			lhsLesser = *(lhs) < *(rhs);
+//		}
+//
+//	};
 
-
-		typedef Buffer KeyString;
-
-		class ChainKey {
-		public :
-			ChainKey(KeyString& key) : Key(key) {};
-			ChainKey(uint64_t id) :ID(id) { isID = true; }
-			bool isID = 0;
-			union {
-				std::reference_wrapper<KeyString> Key;
-				uint64_t ID;
-			};
-		};
-
-		typedef TypeBuffer<ChainKey> KeyChain;
-
-		static KeyString MakeKey(const char* key)
-		{
-			KeyString newKey;
-			newKey.CopyBack((const uint8_t*)key, std::strlen(key));
-			return newKey;
-		}
-
-		static KeyString MakeKey(uint64_t key)
-		{
-			uint8_t* b = (uint8_t*)&key;
-			uint8_t* e = b + 7;
-			
-			if (is_big_endian())
-				while (*b == 0)
-					++b;
-			else
-				while (*e == 0)
-					--e;
-
-			KeyString newKey;
-			newKey.CopyBack(b, (e-b)+1);
-			if (!is_big_endian())
-				newKey.Reverse(0,newKey.Size());
-			return newKey;
-		}
-
-		static bool operator==(const KeyString& lhs, const KeyString& rhs) {
-			if (lhs.Size() != rhs.Size())
-				return false;
-			return !std::memcmp(lhs.Data(), rhs.Data(), lhs.Size());
-		}
-
-		static bool operator<(const KeyString& lhs, const KeyString& rhs) {
-			uint64_t size = rhs.Size();
-			if (lhs.Size() < rhs.Size())
-				size = lhs.Size();
-			return std::memcmp(lhs.Data(), rhs.Data(), size) < 0;
-		}
-
-		struct KeyCompare {
-			KeyCompare(const KeyString& lhs, const KeyString& rhs);
-			KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize);
-			void Compare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize);
-			size_t commonPrefix = 0;
-			size_t lhsPostfix = 0;
-			size_t rhsPostfix = 0;
-			bool lhsLesser = false;
-			bool Equal() { return !(lhsPostfix || rhsPostfix); }
-
-		};
-		inline KeyCompare::KeyCompare(const KeyString& lhs, const KeyString& rhs)
-		{
-			Compare(lhs.Data(), rhs.Data(), lhs.Size(), rhs.Size());
-		}
-		inline KeyCompare::KeyCompare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
-		{
-			Compare(lhs, rhs, lhsSize, rhsSize);
-		}
-
-		inline void KeyCompare::Compare(const uint8_t* lhs, const uint8_t* rhs, size_t lhsSize, size_t rhsSize)
-		{
-			size_t compSize = (lhsSize < rhsSize) ? lhsSize : rhsSize;
-
-			while (*lhs == *rhs && commonPrefix < compSize)
-				commonPrefix++, lhs++, rhs++;
-
-			lhsPostfix = lhsSize - commonPrefix;
-			rhsPostfix = rhsSize - commonPrefix;
-			lhsLesser = *(lhs) < *(rhs);
-		}
-
-	};
-
-};
+//};
 
 
 
@@ -235,4 +167,4 @@ namespace ContainersPP {
 //	return key.Size();
 //}
 
-#endif //Keys
+//#endif //Keys

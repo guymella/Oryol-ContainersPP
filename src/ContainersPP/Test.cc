@@ -20,7 +20,7 @@
 #include "UnitTests/FileBlockTest.h"
 #include "UnitTests/AllocatorTest.h"
 #include "UnitTests/FileAllocatorTest.h"
-
+#include "UnitTests/ObjectTest.h"
 
 
 //#include "Core/Containers/Array.h"
@@ -46,7 +46,7 @@ int main(void) {
 	CHECK(TestFileBlock());
 	CHECK(TestAllocator());
 	CHECK(TestFileAllocator());
-
+	CHECK(TestObject());
 
 
 	return 0;

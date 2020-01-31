@@ -29,6 +29,7 @@ fips_begin_module(ContainersPP)
         EntityTable.h
         FileBlock.h
         FileAllocator.h
+        Object.h Object.cpp
         Catalogue.h
     )
 
@@ -47,12 +48,13 @@ fips_begin_module(ContainersPP)
         iAllocator.h
         iTable.h iTable.cpp
         iTrie.h
+        iObject.h iObject.cpp
     )
 	
     fips_dir(Types)
     fips_files(
         Types.h
-        KeyString.h
+        KeyString.h KeyString.cpp
         TypeDescr.h
         Schema.h
         BitPointer.h
@@ -77,6 +79,7 @@ fips_begin_app(test cmdline)
             FileBlockTest.h
             AllocatorTest.h
             FileAllocatorTest.h
+            ObjectTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()
