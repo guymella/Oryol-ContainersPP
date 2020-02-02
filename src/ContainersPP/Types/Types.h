@@ -30,7 +30,17 @@ namespace ContainersPP {
         static const int32_t EndOfFile = -1;
         static const int32_t EndOfRange = -1;
 
-		
+		static uint8_t GetMinSize(uint64_t num) {
+			if (num <= 0xff)
+				return sizeof(uint8_t);
+			if (num <= 0xffff)
+				return sizeof(uint16_t);
+			if (num <= 0xffffffff)
+				return sizeof(uint32_t);
+
+			return sizeof(uint64_t);
+		}
+
 		static bool is_big_endian()
 		{
 			union {

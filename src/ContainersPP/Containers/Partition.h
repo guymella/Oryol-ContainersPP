@@ -19,6 +19,7 @@ namespace ContainersPP {
     //#ifndef _ITABLE_DEFINED
     class iTable;
     //#endif
+
 	class Partition : public iBlockD {
 	public:
         Partition() {};
@@ -62,6 +63,8 @@ namespace ContainersPP {
         uint64_t StartOffset = 0;
         uint64_t size = 0;
 	};
+
+ 
 
     //uint8_t* ContainersPP::Partition::AddBack(uint64_t numBytes)
     //{

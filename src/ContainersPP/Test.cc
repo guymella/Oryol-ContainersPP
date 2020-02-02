@@ -44,6 +44,7 @@ int main(void) {
 	CHECK(TestCatTrie());
 	CHECK(TestTypeTrie());
 	CHECK(TestTable());
+	CHECK(TestInlineTable());
 	CHECK(TestFileBlock());
 	CHECK(TestAllocator());
 	CHECK(TestFileAllocator());

@@ -60,7 +60,7 @@ namespace ContainersPP {
         Allocator* allocator;
         uint64_t BlockID;
     };
-
+          
 }//contanersPP
 
 #endif //defined
