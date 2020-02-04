@@ -213,7 +213,8 @@ inline uint8_t* Buffer::AddFront(uint64_t numBytes)
 inline uint8_t* Buffer::AddInsert(uint64_t offset, uint64_t numBytes)
 {
     ReserveBack(numBytes);
-    Oryol::Memory::Move(Data(offset), Data(offset + numBytes), (int)(Size() - offset));
+    if (Size() - offset)
+        Oryol::Memory::Move(Data(offset), Data(offset + numBytes), (int)(Size() - offset));
     Oryol::Memory::Fill(Data(offset), (int)numBytes, 0);
     size += numBytes;
     return Data(offset);

@@ -38,13 +38,14 @@ int main(void) {
 	CHECK(BufferDblTest<BufferDbl>());
 	
 	CHECK(elementBufferTest<TypeBuffer<_test>>());
-
+	CHECK(TestInlineTable());
 	CHECK(TestStruct());
 	CHECK(TestTrie());
 	CHECK(TestCatTrie());
 	CHECK(TestTypeTrie());
+	CHECK(TestIndexTrie());
 	CHECK(TestTable());
-	CHECK(TestInlineTable());
+	
 	CHECK(TestFileBlock());
 	CHECK(TestAllocator());
 	CHECK(TestFileAllocator());

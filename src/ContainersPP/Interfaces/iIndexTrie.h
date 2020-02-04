@@ -52,14 +52,14 @@ namespace ContainersPP {
     };
 
     struct PackKeyAdapter {
-        PackKeyAdapter(iBlockD& Container, uint32_t StartOffset) : block(Container), startOffset(StartOffset) {};
-        iBlockD& block;
+        PackKeyAdapter(InlinePartition Container, uint32_t StartOffset) : block(Container), startOffset(StartOffset) {};
+        InlinePartition block;
         uint32_t startOffset;
         void Insert(const uint8_t* key, uint8_t size);
 
         PackKey& Key() { return *(PackKey*)block.Data(startOffset); };
 
-        void Truncate(uint8_t Tare, uint32_t PostID, bool ClearValue = true);
+        void Truncate(uint8_t NewLength, uint32_t PostID, bool ClearValue = true);
         void SetPostID(uint32_t ID);
         bool ClearPostID();
         void SetValue(uint32_t val);
@@ -77,12 +77,12 @@ namespace ContainersPP {
         uint8_t Count() const { return *Block().Data(); };
         friend class iIndexTrie;
     protected:
-        virtual iBlockD& Block() = 0;
-        virtual const iBlockD& Block() const = 0;
+        virtual InlinePartition Block() = 0;
+        virtual const InlinePartition Block() const = 0;
     private:
         PackKeyAdapter InsertNewKey(const uint8_t* key, uint8_t Keylen,uint32_t val= std::numeric_limits<uint32_t>::max(), uint32_t PostID = 0);
         PackKeyAdapter InsertKey(const PackKey* CopyKey, uint8_t Tare = 0);
-        PackKeyAdapter PushDown(PackKey* breakKey, uint8_t prefixLen, iIndexTrieNode& PushNode);
+        PackKeyAdapter PushDown(PackKeyAdapter breakKey, uint8_t prefixLen, iIndexTrieNode& PushNode);
         uint64_t GetKeyOffset(uint64_t index);
         PackKey* GetKey(uint64_t index);
         uint8_t& Count() { return *Block().Data(); };
@@ -91,11 +91,13 @@ namespace ContainersPP {
     class Node_Adapter : public iIndexTrieNode
     {
     public:
+        Node_Adapter(InlinePartition Block) : block(Block) {};
+
         virtual uint32_t ID() const { return (uint32_t)block.ID(); };
         friend class iIndexTrie;
     protected:
-        virtual iBlockD& Block() override { return block; };
-        virtual const iBlockD& Block() const override { return block; };
+        virtual InlinePartition Block() override { return block; };
+        virtual const InlinePartition Block() const override { return block; };
     private:
         InlinePartition block;
     };

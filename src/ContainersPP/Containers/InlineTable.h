@@ -48,6 +48,27 @@ namespace ContainersPP {
         InlinePartition() {};
         InlinePartition(iInlineTable* Table, uint64_t BlockID) : table(Table), PartitionID(BlockID) {};
 
+        InlinePartition(InlinePartition&& rhs) {
+            table = rhs.table;
+            PartitionID = rhs.PartitionID;
+        }
+
+        void operator=(InlinePartition&& rhs) {
+            table = rhs.table; 
+            PartitionID = rhs.PartitionID;
+        }
+
+        InlinePartition(const InlinePartition& rhs) {
+            table = rhs.table;
+            PartitionID = rhs.PartitionID;
+        }
+
+        void operator=(const InlinePartition& rhs) {
+            table = rhs.table;
+            PartitionID = rhs.PartitionID;
+        }
+        
+
         /// get number of bytes in buffer
         virtual uint64_t Size() const override { return table->Size(PartitionID); };
         /// get read-only pointer to content (throws assert if would return nullptr)

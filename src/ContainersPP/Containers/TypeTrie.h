@@ -16,6 +16,7 @@
 
 #include "ContainersPP/Interfaces/iTrie.h"
 #include "ContainersPP/Interfaces/iCatalogueTrie.h"
+#include "ContainersPP/Interfaces/iIndexTrie.h"
 
 namespace ContainersPP {
 
@@ -104,5 +105,33 @@ private:
 
 };
 
+
+
+//////////////////
+
+
+
+
+class IndexTrie : public iIndexTrie
+{
+public:
+    IndexTrie() { NewNode(); };
+
+
+protected:
+    virtual Node_Adapter Nodes(uint32_t Index) override { return Node_Adapter(table[Index]); };
+    virtual const Node_Adapter Nodes(uint32_t Index) const override { return Node_Adapter(table[Index]); };
+    virtual Node_Adapter NewNode() {
+
+
+        InlinePartition p = table[table.New(1)];
+        p.Data()[0] = 0;
+        return Node_Adapter(p);
+    }
+
+private:
+    InlineTable table;
+
+};
 
 } // namespace Oryol

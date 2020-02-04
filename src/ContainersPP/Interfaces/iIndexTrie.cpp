@@ -76,10 +76,10 @@ namespace ContainersPP {
 		new (block.AddInsert(startOffset, sizeof(PackKey) + size)) PackKey(key, size);
 	}
 
-	void PackKeyAdapter::Truncate(uint8_t Tare, uint32_t PostID, bool clearValue)
-	{
-		Key().KeyLen -= Tare;
-		block.Remove(startOffset + sizeof(PackKey), Tare);
+	void PackKeyAdapter::Truncate(uint8_t NewLength, uint32_t PostID, bool clearValue)
+	{		
+		block.Remove(startOffset + sizeof(PackKey) + NewLength, Key().KeyLen - NewLength);
+		Key().KeyLen = NewLength;
 		SetPostID(PostID);
 		if (clearValue)
 			ClearValue();
@@ -87,7 +87,7 @@ namespace ContainersPP {
 
 	void PackKeyAdapter::SetPostID(uint32_t ID)
 	{
-		if (ID = 0) {
+		if (ID == 0) {
 			ClearPostID();
 			return;
 		};
@@ -104,12 +104,15 @@ namespace ContainersPP {
 		case 1:
 			pt = ContainersPP::PackKeyEnum::tiny;
 			*Key().PostPtr() = (uint8_t)ID;
+			break;
 		case 2:
 			pt = ContainersPP::PackKeyEnum::small;
 			*(uint16_t*)Key().PostPtr() = (uint16_t)ID;
+			break;
 		case 4:
 			pt = ContainersPP::PackKeyEnum::full;
 			*(uint32_t*)Key().PostPtr() = (uint32_t)ID;
+			break;
 		default:
 			break;
 		};
@@ -147,7 +150,7 @@ namespace ContainersPP {
 
 	void PackKeyAdapter::SetValue(uint32_t val)
 	{
-		if (val = std::numeric_limits<uint32_t>::max()) {
+		if (val == std::numeric_limits<uint32_t>::max()) {
 			ClearValue();
 			return;
 		};
@@ -164,12 +167,15 @@ namespace ContainersPP {
 		case 1:
 			vt = ContainersPP::PackKeyEnum::tiny;
 			*Key().ValuePtr() = (uint8_t)val;
+			break;
 		case 2:
 			vt = ContainersPP::PackKeyEnum::small;
 			*(uint16_t*)Key().ValuePtr() = (uint16_t)val;
+			break;
 		case 4:
 			vt = ContainersPP::PackKeyEnum::full;
 			*(uint32_t*)Key().ValuePtr() = (uint32_t)val;
+			break;
 		default:
 			break;
 		};
@@ -202,11 +208,14 @@ namespace ContainersPP {
 
 	PackKey* iIndexTrieNode::Find(const uint8_t* key)
 	{
-		PackKey* itr = (PackKey*)Block().Data(1);
-		uint8_t count = Count();
-		for (uint8_t i = 0; i < count; i++)
-			if (itr->Key()[0] >= key[0])
-				return itr;
+		if (Block().Data()[0]) {
+			PackKey* itr = (PackKey*)Block().Data(1);
+			uint8_t count = Count();
+			for (uint8_t i = 0; i < count; i++, itr = itr->Next()) {				
+				if ((itr)->Key()[0] >= key[0])
+					return itr;
+			}
+		}
 
 		return nullptr;
 	}
@@ -221,8 +230,8 @@ namespace ContainersPP {
 	PackKeyAdapter iIndexTrieNode::InsertNewKey(const uint8_t* key, uint8_t Keylen, uint32_t val, uint32_t PostID)
 	{
 		PackKey* k = Find(key);
-		o_assert_dbg(*key != *(k->Key()));
-		PackKeyAdapter a(Block(), (uint32_t)((uint8_t*)k - Block().Data()));
+		o_assert_dbg(!k || *key != *(k->Key()));
+		PackKeyAdapter a(Block(), (uint32_t)(!k ? Block().Size() : ((uint8_t*)k - Block().Data())));
 		a.Insert(key, Keylen);
 		a.SetPostID(PostID);
 		a.SetValue(val);
@@ -235,17 +244,19 @@ namespace ContainersPP {
 	{
 		uint32_t pid = CopyKey->PostID();
 		uint32_t val = CopyKey->Value();
-
-		return InsertNewKey(CopyKey->Key() + Tare, CopyKey->KeyLen - Tare, val, pid);		
+		uint8_t len = CopyKey->KeyLen - Tare;
+		uint8_t key[256];
+		Oryol::Memory::Copy(CopyKey->Key() + Tare, key, len);
+		return 	InsertNewKey(key, len, val, pid);
 	}
 
-	PackKeyAdapter iIndexTrieNode::PushDown(PackKey* breakKey, uint8_t prefixLen, iIndexTrieNode& PushNode)
+	PackKeyAdapter iIndexTrieNode::PushDown(PackKeyAdapter breakKey, uint8_t prefixLen, iIndexTrieNode& PushNode)
 	{
-		PushNode.InsertKey(breakKey, prefixLen);
-		PackKeyAdapter k(Block(), (uint32_t)((uint8_t*)breakKey - Block().Data()));
-		k.Truncate(prefixLen, PushNode.ID());
+		PackKeyAdapter newKey = PushNode.InsertKey(&breakKey.Key(), prefixLen);
+		//PackKeyAdapter k(Block(), (uint32_t)((uint8_t*)breakKey - Block().Data()));
+		breakKey.Truncate(prefixLen, PushNode.ID());
 
-		return k;
+		return breakKey;
 	}
 
 	uint64_t iIndexTrieNode::GetKeyOffset(uint64_t index)
@@ -272,6 +283,8 @@ namespace ContainersPP {
 		Node_Adapter node = Nodes(0);
 		while (KeyLen) {
 			PackKey* k = node.Find(key);
+			if (!k)
+				return nullptr;
 			Types::KeyCompare c(k->Key(), key, k->KeyLen, KeyLen);
 			if (c.Equal())
 				return k;
@@ -290,6 +303,9 @@ namespace ContainersPP {
 		Node_Adapter node = Nodes(0);
 		while (KeyLen) {
 			PackKey* k = node.Find(key);
+			if (!k) { //no keys, insert here
+				return node.InsertNewKey(key, (uint8_t)KeyLen);
+			}
 			Types::KeyCompare c(k->Key(), key, k->KeyLen, KeyLen);
 			if (c.Equal()) //Match
 				return PackKeyAdapter(node.Block(), (uint32_t)((uint8_t*)k - node.Block().Data()));
@@ -299,16 +315,24 @@ namespace ContainersPP {
 			key += c.commonPrefix;
 			KeyLen -= (uint8_t)c.commonPrefix;
 			if (c.lhsPostfix) { //Partial match
+				PackKeyAdapter kk(node.Block(), (uint32_t)((uint8_t*)k - node.Block().Data()));
 				Node_Adapter na = NewNode();
-				PackKeyAdapter ka = node.PushDown(k, (uint8_t)c.commonPrefix, na);
+				PackKeyAdapter ka = node.PushDown(kk, (uint8_t)c.commonPrefix, na);
 				if (c.rhsPostfix) {// goes in new node
 					return na.InsertNewKey(key, KeyLen);
 				}
 				//goes in this key
 				return ka;
 			}
-			//partial match keep searching
-			node = Nodes(k->PostID());			
+			//fill match check posts
+			if (!k->PostType()) {				
+				//Posts dont exist, create them
+				PackKeyAdapter ka(node.Block(), (uint32_t)((uint8_t*)k - node.Block().Data()));
+				ka.SetPostID(NewNode().ID());
+				k = &ka.Key();
+			}
+			node = Nodes(k->PostID());
+						
 		}
 		
 		o_assert_dbg(false);
