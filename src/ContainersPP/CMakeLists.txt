@@ -30,7 +30,7 @@ fips_begin_module(ContainersPP)
         FileBlock.h
         FileAllocator.h
         Object.h Object.cpp
-        Catalogue.h
+        Catalogue.h Catalogue.cpp
         InlineTable.h InlineTable.cpp
     )
 

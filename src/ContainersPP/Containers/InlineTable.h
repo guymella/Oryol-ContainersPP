@@ -112,7 +112,7 @@ namespace ContainersPP {
 
     class InlineTable : public iInlineTable {
     public:
-        InlineTable();
+        InlineTable(uint32_t PartitionCount = 0);
     protected:
         virtual iBlockD& Buffer() override { return block; };
         virtual const iBlockD& Buffer() const override { return block; };
@@ -122,7 +122,7 @@ namespace ContainersPP {
 
     class InlineSubTable : public iInlineTable {
     public:
-        InlineSubTable(iInlineTable* Table, uint64_t BlockID);
+        InlineSubTable(iInlineTable* Table, uint64_t BlockID, uint32_t PartitionCount = 0);
     protected:
         virtual iBlockD& Buffer() override { return block; };
         virtual const iBlockD& Buffer() const override { return block; };

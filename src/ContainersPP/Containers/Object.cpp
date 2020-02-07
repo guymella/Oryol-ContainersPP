@@ -2,17 +2,14 @@
 
 namespace ContainersPP {
 
-	iCatalogue& ContainersPP::NullObject::GetRef(const Types::KeyString& key)
+	
+
+	iCatalogue& NullObject::GetRef(const uint8_t* Key, uint8_t KeyLen)
 	{
 		return NULLOBJECT;
 	}
 
-	iCatalogue& NullObject::GetRef(const Types::KeyChain& keys, uint32_t keyindex)
-	{
-		return NULLOBJECT;
-	}
-
-	iCatalogue& NullObject::GetRef(uint64_t Index)
+	iCatalogue& NullObject::GetRefByIndex(uint64_t Index)
 	{
 		return NULLOBJECT;
 	}
@@ -22,17 +19,12 @@ namespace ContainersPP {
 		return NULLOBJECT;
 	}
 
-	Object NullObject::Get(const Types::KeyString& key)
+	Object NullObject::Get(const uint8_t* Key, uint8_t KeyLen)
 	{
 		return Object();
 	}
 
-	Object NullObject::Get(const Types::KeyChain& keys, uint32_t keyindex)
-	{
-		return Object();
-	}
-
-	Object NullObject::Get(uint64_t Index)
+	Object NullObject::GetByIndex(uint64_t Index)
 	{
 		return Object();
 	}
@@ -52,7 +44,9 @@ namespace ContainersPP {
 		case ObjectEnums::primitive:\
 			return prim->fn;\
 		case ObjectEnums::primitive_ref:\
-			ptr.fn;\
+			return ptr.fn;\
+		case ObjectEnums::attribute_ref:\
+			return atr.fn;\
 		case ObjectEnums::list:\
 			return list.fn;\
 		case ObjectEnums::list_static:\
@@ -73,6 +67,8 @@ namespace ContainersPP {
 			return prim->fn;\
 		case ObjectEnums::primitive_ref:\
 			return ptr.fn;\
+		case ObjectEnums::attribute_ref:\
+			return atr.fn;\
 		default:\
 			break;\
 	}
@@ -123,17 +119,12 @@ namespace ContainersPP {
 		return 0;
 	}
 
-	iCatalogue& Object::GetRef(const Types::KeyString& key)
+	iCatalogue& Object::GetRef(const uint8_t* Key, uint8_t KeyLen)
 	{
 		return NULLOBJECT;
 	}
-
-	iCatalogue& Object::GetRef(const Types::KeyChain& keys, uint32_t keyindex)
-	{
-		return NULLOBJECT;
-	}
-
-	iCatalogue& Object::GetRef(uint64_t Index)
+	
+	iCatalogue& Object::GetRefByIndex(uint64_t Index)
 	{
 		return NULLOBJECT;
 	}
@@ -143,17 +134,12 @@ namespace ContainersPP {
 		return NULLOBJECT;
 	}
 
-	Object Object::Get(const Types::KeyString& key)
+	Object Object::Get(const uint8_t* Key, uint8_t KeyLen)
 	{
 		return Object();
-	}
+	}		
 
-	Object Object::Get(const Types::KeyChain& keys, uint32_t keyindex)
-	{
-		return Object();
-	}
-
-	Object Object::Get(uint64_t Index)
+	Object Object::GetByIndex(uint64_t Index)
 	{
 		return Object();
 	}

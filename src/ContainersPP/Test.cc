@@ -50,7 +50,7 @@ int main(void) {
 	CHECK(TestAllocator());
 	CHECK(TestFileAllocator());
 	CHECK(TestObject());
-
+	CHECK(TestCatalogue());
 
 	return 0;
 }

@@ -69,13 +69,21 @@ namespace ContainersPP {
 
     class iCatalogue : public iObjectList {
     public:
-        virtual iCatalogue& GetRef(const Types::KeyString& key) = 0;
-        virtual iCatalogue& GetRef(const Types::KeyChain& keys, uint32_t keyindex = 0) = 0;
-        virtual iCatalogue& GetRef(uint64_t Index) = 0;
+        iCatalogue& GetRef(const Types::KeyString& key);
+        iCatalogue& GetRef(const Types::KeyChain& keys, uint32_t keyindex = 0);
+        iCatalogue& GetRef(const char* key);
+
+        virtual iCatalogue& GetRef(const uint8_t* Key, uint8_t KeyLen) = 0;
+        virtual iCatalogue& GetRefByIndex(uint64_t Index) = 0;
+        
+        Object Get(const Types::KeyString& key);
+        Object Get(const Types::KeyChain& keys, uint32_t keyindex = 0);
+        Object Get(const char* key);
+
+        virtual Object Get(const uint8_t* Key, uint8_t KeyLen) = 0;
+        virtual Object GetByIndex(uint64_t Index) = 0;
+
         virtual iCatalogue& CDRRef(uint64_t BaseIndex) = 0;
-        virtual Object Get(const Types::KeyString& key) = 0;
-        virtual Object Get(const Types::KeyChain& keys, uint32_t keyindex = 0) = 0;
-        virtual Object Get(uint64_t Index) = 0;
         virtual Object CDR(uint64_t BaseIndex) = 0;
     };
 

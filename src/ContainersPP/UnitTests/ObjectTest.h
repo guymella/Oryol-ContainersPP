@@ -1,8 +1,8 @@
 //------------------------------------------------------------------------------
 //  objectTest.cc
 //------------------------------------------------------------------------------
-#include "ContainersPP/Containers/Object.h"
-
+//#include "ContainersPP/Containers/Object.h"
+#include "ContainersPP/Containers/Catalogue.h"
 using namespace ContainersPP;
 
 #define CHECK o_assert_dbg
@@ -77,6 +77,33 @@ bool TestObject() {
     Object ptr(Types::baseTypes::uint64, op2.Begin(1));
     CHECK(ptr.GetValue(val));
     CHECK(val == 13);
+
+    return true;
+}
+
+
+bool TestCatalogue() {
+
+    Catalogue c;
+
+    CHECK(c.DefineAttribute("Hello", Types::baseTypes::uint64));
+    CHECK(c.DefineAttribute("World", Types::baseTypes::uint64));
+
+    CHECK(c.SchemaList()[0].offset == 0);
+    CHECK(c.SchemaList()[1].offset == 8);
+
+    CHECK(c.GetByIndex(0).SetValue((uint64_t)5));
+    CHECK(c.GetByIndex(1).SetValue((uint64_t)12));
+
+    uint64_t* raw = (uint64_t*)c.Ptr();
+    CHECK(raw[0] == 5);
+    CHECK(raw[1] == 12);
+
+    uint64_t val = 0;
+    CHECK(c.Get("Hello").GetValue(val));
+    CHECK(val == 5);
+    CHECK(c.Get("World").GetValue(val));
+    CHECK(val == 12);
 
     return true;
 }

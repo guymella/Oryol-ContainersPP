@@ -9,6 +9,11 @@
      
     @see Array, ArrayMap, Map
 */
+
+#ifndef Included_iCATALOGUETRIE_H
+#define Included_iCATALOGUETRIE_H
+
+
 //#include <algorithm>
 #include "ContainersPP/Containers/Allocator.h"
 #include "ContainersPP/Types/Types.h"
@@ -63,7 +68,7 @@ namespace ContainersPP {
         uint64_t Size() const { return (uint8_t*)Next() - (uint8_t*)this; };
     };
 
-    CatValEnums::CatValTypes ContainersPP::CatKey::Type() const
+    inline CatValEnums::CatValTypes ContainersPP::CatKey::Type() const
     {
         const Types::BitRef<uint8_t, 2, const uint8_t* > tpr = { &flags,2 };
         
@@ -510,3 +515,6 @@ inline uint64_t iCatTrie::GetKeyOffset(const iBufferV& nodeBuffer, uint64_t inde
 
 
 } // namespace Oryol
+
+
+#endif

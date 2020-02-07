@@ -10,7 +10,7 @@
 #define Included_Object_H
 
 
-#include "Catalogue.h"
+#include "ContainersPP/Interfaces/iObject.h"
 #include "ContainersPP/Interfaces/iAllocator.h"
 
 namespace ContainersPP {
@@ -24,13 +24,11 @@ namespace ContainersPP {
         virtual const void* Begin(uint64_t Index = 0) const override { return nullptr; };
         virtual bool Remove(uint32_t Index) override { return false; };
         virtual uint64_t Count() const override { return 0; };
-        virtual iCatalogue& GetRef(const Types::KeyString& key) override;
-        virtual iCatalogue& GetRef(const Types::KeyChain& keys, uint32_t keyindex = 0) override;
-        virtual iCatalogue& GetRef(uint64_t Index) override;
+        virtual iCatalogue& GetRef(const uint8_t* Key, uint8_t KeyLen) override;
+        virtual iCatalogue& GetRefByIndex(uint64_t Index) override;
         virtual iCatalogue& CDRRef(uint64_t BaseIndex) override;
-        virtual Object Get(const Types::KeyString& key) override;
-        virtual Object Get(const Types::KeyChain& keys, uint32_t keyindex = 0) override;
-        virtual Object Get(uint64_t Index) override;
+        virtual Object Get(const uint8_t* Key, uint8_t KeyLen) override;
+        virtual Object GetByIndex(uint64_t Index) override;
         virtual Object CDR(uint64_t BaseIndex) override;
     protected:
         virtual bool pushBack() override { return false; };
@@ -77,6 +75,21 @@ namespace ContainersPP {
     private:
         Types::baseTypes type;
         void* ptr;
+    };
+
+    class Attribute_Ref : public NullObject {
+    public:
+        Attribute_Ref(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset) : type(valueType), ptr(Catalogue), offset(DataOffset) {};
+        Attribute_Ref(const Attribute_Ref& rhs) : type(rhs.type), ptr(rhs.ptr), offset(rhs.offset) {};
+        virtual Types::baseTypes Type() const override { return type; };
+        virtual void* Ptr() override { return (uint8_t*)(ptr->Ptr()) + offset; };
+        virtual const void* Ptr() const override { return (uint8_t*)(ptr->Ptr()) + offset; };
+
+        friend Object;
+    private:
+        Types::baseTypes type;
+        iCatalogue* ptr;
+        uint16_t offset;
     };
 
     class Primitive_List_Static_Ref : public NullObject {
@@ -138,6 +151,7 @@ namespace ContainersPP {
             null,
             primitive,
             primitive_ref,
+            attribute_ref,
             list,
             list_static
         };
@@ -148,13 +162,20 @@ namespace ContainersPP {
        
         Object() {};
         Object(Primitive& primative) : prim(&primative), wrapperType(ObjectEnums::objectTypes::primitive) {};
+
         Object(Primitive_Ref& primative) : ptr(primative), wrapperType(ObjectEnums::objectTypes::primitive_ref) {};
         Object(Types::baseTypes valueType, void* Ptr) : ptr(valueType, Ptr), wrapperType(ObjectEnums::objectTypes::primitive_ref) {};
+
+        Object(Attribute_Ref& Attribute) : atr(Attribute), wrapperType(ObjectEnums::objectTypes::attribute_ref) {};
+        Object(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset) : atr(valueType, Catalogue, DataOffset), wrapperType(ObjectEnums::objectTypes::attribute_ref) {};
+        
+
         Object(Primitive_List_Static_Ref& List) : list_ptr(List), wrapperType(ObjectEnums::objectTypes::list_static) {};
         Object(Types::baseTypes valueType, void* Ptr, uint64_t Count) : list_ptr(valueType, Ptr, Count), wrapperType(ObjectEnums::objectTypes::list_static) {};
-        Object(Primitive_List_Ref& List) : list(List), wrapperType(ObjectEnums::objectTypes::list_static) {};
-        Object(Types::baseTypes valueType, iAllocator* Allocator, uint64_t BlockID) : list(valueType, Allocator, BlockID), wrapperType(ObjectEnums::objectTypes::list_static) {};
-        Object(Types::baseTypes valueType, iBlockD& Block) : list(valueType, Block), wrapperType(ObjectEnums::objectTypes::list_static) {};
+
+        Object(Primitive_List_Ref& List) : list(List), wrapperType(ObjectEnums::objectTypes::list) {};
+        Object(Types::baseTypes valueType, iAllocator* Allocator, uint64_t BlockID) : list(valueType, Allocator, BlockID), wrapperType(ObjectEnums::objectTypes::list) {};
+        Object(Types::baseTypes valueType, iBlockD& Block) : list(valueType, Block), wrapperType(ObjectEnums::objectTypes::list) {};
 
         Object(const Object& rhs) {};
         Object(Object&& rhs) {};
@@ -165,13 +186,11 @@ namespace ContainersPP {
         virtual const void* Begin(uint64_t Index = 0) const override;
         virtual bool Remove(uint32_t Index) override;
         virtual uint64_t Count() const override;
-        virtual iCatalogue& GetRef(const Types::KeyString& key) override;
-        virtual iCatalogue& GetRef(const Types::KeyChain& keys, uint32_t keyindex = 0) override;
-        virtual iCatalogue& GetRef(uint64_t Index) override;
+        virtual iCatalogue& GetRef(const uint8_t* Key, uint8_t KeyLen) override;
+        virtual iCatalogue& GetRefByIndex(uint64_t Index) override;
         virtual iCatalogue& CDRRef(uint64_t BaseIndex) override;
-        virtual Object Get(const Types::KeyString& key) override;
-        virtual Object Get(const Types::KeyChain& keys, uint32_t keyindex = 0) override;
-        virtual Object Get(uint64_t Index) override;
+        virtual Object Get(const uint8_t* Key, uint8_t KeyLen) override;
+        virtual Object GetByIndex(uint64_t Index) override;
         virtual Object CDR(uint64_t BaseIndex) override;
     protected:
         virtual bool pushBack() override;
@@ -183,6 +202,7 @@ namespace ContainersPP {
         union {
             Primitive* prim;
             Primitive_Ref ptr;
+            Attribute_Ref atr;
             Primitive_List_Ref list;
             Primitive_List_Static_Ref list_ptr;            
         };

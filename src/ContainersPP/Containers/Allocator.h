@@ -5,6 +5,10 @@
     @ingroup Core
     @brief growable memory buffer for raw data
 */
+
+#ifndef Included_ALLOCATOR_H
+#define Included_ALLOCATOR_H
+
 #include "ContainersPP/Types/Types.h"
 #include "Core/Assertion.h"
 #include "Core/Memory/Memory.h"
@@ -38,7 +42,7 @@ private:
     TypeVector<Buffer> buffers;
 };
 
-uint64_t ContainersPP::Allocator::New()
+inline uint64_t ContainersPP::Allocator::New()
 {
     uint64_t id = Count();
     buffers.PushBack(Buffer());
@@ -106,7 +110,7 @@ private:
     TypeVector<uint64_t> _index;
 };
 
-uint64_t ContainersPP::CoAllocator::New()
+inline uint64_t ContainersPP::CoAllocator::New()
 {
     uint64_t newID = Count();
     _index.PushBack(allocator->New());
@@ -123,3 +127,6 @@ inline uint64_t CoAllocator::New(uint64_t newSize)
 
 
 } // namespace Oryol
+
+
+#endif

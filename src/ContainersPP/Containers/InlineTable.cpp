@@ -1,9 +1,11 @@
 #include "InlineTable.h"
 
-ContainersPP::InlineTable::InlineTable()
+ContainersPP::InlineTable::InlineTable(uint32_t PartitionCount)
 {
     Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t)*2);
     Index()[0] = sizeof(uint64_t) * 2;
+    for (uint32_t i = 0; i < PartitionCount; i++) 
+        New();
 }
 ContainersPP::InlinePartition ContainersPP::iInlineTable::operator[](uint64_t index)
 {
@@ -158,8 +160,10 @@ void ContainersPP::InlinePartition::Clear()
     Remove(0, Size());
 }
 
-ContainersPP::InlineSubTable::InlineSubTable(iInlineTable* Table, uint64_t BlockID) : block(Table, BlockID)
+ContainersPP::InlineSubTable::InlineSubTable(iInlineTable* Table, uint64_t BlockID, uint32_t PartitionCount) : block(Table, BlockID)
 {
     Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
     Index()[0] = sizeof(uint64_t) * 2;
+    for (uint32_t i = 0; i < PartitionCount; i++) 
+        New();
 }

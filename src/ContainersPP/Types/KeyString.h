@@ -19,6 +19,7 @@ namespace ContainersPP {
 
 		class ChainKey {
 		public :
+			ChainKey() {};
 			ChainKey(KeyString& key) : Key(key) {};
 			ChainKey(uint64_t id) :ID(id) { isID = true; }
 			bool isID = 0;

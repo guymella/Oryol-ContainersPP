@@ -2,7 +2,8 @@
 //------------------------------------------------------------------------------
 
 
-#include "iObject.h"
+//#include "iObject.h"
+#include "ContainersPP/Containers/Object.h"
 
 namespace ContainersPP {
 
@@ -80,4 +81,32 @@ namespace ContainersPP {
         }
         return false;
     }
+	iCatalogue& iCatalogue::GetRef(const Types::KeyString& key)
+	{
+        return GetRef(key.Data(), (uint8_t)key.Size());
+	}
+	iCatalogue& iCatalogue::GetRef(const Types::KeyChain& keys, uint32_t keyindex)
+	{
+        if(keyindex == keys.Size()-1)
+            return GetRef(keys[keyindex].Key.get().Data(), (uint8_t)keys[keyindex].Key.get().Size());
+        return GetRef(keys[keyindex].Key.get().Data(), (uint8_t)keys[keyindex].Key.get().Size()).GetRef(keys,keyindex+1);
+	}
+	iCatalogue& iCatalogue::GetRef(const char* key)
+	{
+        return GetRef((const uint8_t*)key, (uint8_t)std::strlen(key));
+	}
+	Object iCatalogue::Get(const Types::KeyString& key)
+	{
+        return Get(key.Data(), (uint8_t)key.Size());
+	}
+	Object iCatalogue::Get(const Types::KeyChain& keys, uint32_t keyindex)
+	{
+        if (keyindex == keys.Size() - 1)
+            return Get(keys[keyindex].Key.get().Data(), (uint8_t)keys[keyindex].Key.get().Size());
+        return GetRef(keys[keyindex].Key.get().Data(), (uint8_t)keys[keyindex].Key.get().Size()).Get(keys, keyindex + 1);
+	}
+	Object iCatalogue::Get(const char* key)
+	{
+        return Get((const uint8_t*)key, (uint8_t)std::strlen(key));
+	}
 }

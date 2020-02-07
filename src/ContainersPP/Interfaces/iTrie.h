@@ -9,6 +9,11 @@
      
     @see Array, ArrayMap, Map
 */
+
+
+#ifndef Included_ITRIE_H
+#define Included_ITRIE_H
+
 //#include <algorithm>
 #include "ContainersPP/Containers/Allocator.h"
 #include "ContainersPP/Types/Types.h"
@@ -421,3 +426,5 @@ inline uint64_t iTrie<TYPE>::GetKeyOffset(const iBufferV& nodeBuffer, uint64_t i
 
 
 } // namespace Oryol
+
+#endif
