@@ -131,7 +131,8 @@ private:
 class SubIndexTrie : public iIndexTrie
 {
 public:
-    SubIndexTrie(iInlineTable* Table, uint64_t BlockID) : table(Table,BlockID) { NewNode(); };
+    SubIndexTrie() {};
+    SubIndexTrie(iInlineTable* Table, uint64_t BlockID) : table(Table,BlockID) { if(!table.Count()) NewNode(); };
 protected:
     virtual Node_Adapter Nodes(uint32_t Index) override { return Node_Adapter(table[Index]); };
     virtual const Node_Adapter Nodes(uint32_t Index) const override { return Node_Adapter(table[Index]); };

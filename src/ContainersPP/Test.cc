@@ -51,6 +51,7 @@ int main(void) {
 	CHECK(TestFileAllocator());
 	CHECK(TestObject());
 	CHECK(TestCatalogue());
+	CHECK(TestFileCatalogue());
 
 	return 0;
 }

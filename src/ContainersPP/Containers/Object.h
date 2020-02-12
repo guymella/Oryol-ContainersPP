@@ -153,7 +153,9 @@ namespace ContainersPP {
             primitive_ref,
             attribute_ref,
             list,
-            list_static
+            list_static,
+            list_item,
+            const_list_item
         };
     }
 
@@ -176,6 +178,12 @@ namespace ContainersPP {
         Object(Primitive_List_Ref& List) : list(List), wrapperType(ObjectEnums::objectTypes::list) {};
         Object(Types::baseTypes valueType, iAllocator* Allocator, uint64_t BlockID) : list(valueType, Allocator, BlockID), wrapperType(ObjectEnums::objectTypes::list) {};
         Object(Types::baseTypes valueType, iBlockD& Block) : list(valueType, Block), wrapperType(ObjectEnums::objectTypes::list) {};
+
+        Object(ObjectListRef<iObjectList*>& List_Item) : list_item(List_Item), wrapperType(ObjectEnums::objectTypes::list_item) {};
+        Object(iObjectList* list_ptr, uint64_t Index) : list_item(list_ptr, Index), wrapperType(ObjectEnums::objectTypes::list_item) {};
+        Object(ObjectListRef<const iObjectList*>& List_Item) : const_list_item(List_Item), wrapperType(ObjectEnums::objectTypes::const_list_item) {};
+        Object(const iObjectList* list_ptr, uint64_t Index) : const_list_item(list_ptr, Index), wrapperType(ObjectEnums::objectTypes::const_list_item) {};
+
 
         Object(const Object& rhs) {};
         Object(Object&& rhs) {};
@@ -204,7 +212,9 @@ namespace ContainersPP {
             Primitive_Ref ptr;
             Attribute_Ref atr;
             Primitive_List_Ref list;
-            Primitive_List_Static_Ref list_ptr;            
+            Primitive_List_Static_Ref list_ptr;   
+            ObjectListRef<iObjectList*> list_item;
+            ObjectListRef<const iObjectList*> const_list_item;
         };
 
         

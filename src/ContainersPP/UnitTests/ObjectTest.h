@@ -78,6 +78,11 @@ bool TestObject() {
     CHECK(ptr.GetValue(val));
     CHECK(val == 13);
 
+    //test GetIndex() primative
+    Object i = op2.GetIndex(2);
+    CHECK(i.GetValue(val));
+    CHECK(val == 14);
+
     return true;
 }
 
@@ -105,5 +110,70 @@ bool TestCatalogue() {
     CHECK(c.Get("World").GetValue(val));
     CHECK(val == 12);
 
+    //Todo:: Test instances list
+
+
+
     return true;
 }
+
+bool TestFileCatalogue() {
+
+    FileCatalogue c("C:\\COSMIC_TEST\\1\\", 0);
+
+    CHECK(c.DefineAttribute("Hello", Types::baseTypes::uint64));
+    c.Delete();
+    return true;
+}
+//
+//bool TestFileCatalogue() {
+//
+//    FileCatalogue c("C:\\COSMIC_TEST\\1\\", 0);
+//
+//    CHECK(c.DefineAttribute("Hello", Types::baseTypes::uint64));
+//    CHECK(c.DefineAttribute("World", Types::baseTypes::uint64));
+//
+//    CHECK(c.SchemaList()[0].offset == 0);
+//    CHECK(c.SchemaList()[1].offset == 8);
+//
+//    CHECK(c.GetByIndex(0).SetValue((uint64_t)5));
+//    CHECK(c.GetByIndex(1).SetValue((uint64_t)12));
+//
+//    uint64_t* raw = (uint64_t*)c.Ptr();
+//    CHECK(raw[0] == 5);
+//    CHECK(raw[1] == 12);
+//
+//    uint64_t val = 0;
+//    CHECK(c.Get("Hello").GetValue(val));
+//    CHECK(val == 5);
+//    CHECK(c.Get("World").GetValue(val));
+//    CHECK(val == 12);
+//
+//    //Todo:: Test instances list
+//    CHECK(c.Save());
+//
+//
+//    //////////////////////////
+//    FileCatalogue c2("C:\\COSMIC_TEST\\1\\", 0);
+//
+//    CHECK(c2.SchemaList()[0].offset == 0);
+//    CHECK(c2.SchemaList()[1].offset == 8);
+//
+//    CHECK(c2.GetByIndex(0).SetValue((uint64_t)5));
+//    CHECK(c2.GetByIndex(1).SetValue((uint64_t)12));
+//
+//    uint64_t* raw2 = (uint64_t*)c2.Ptr();
+//    CHECK(raw2[0] == 5);
+//    CHECK(raw2[1] == 12);
+//
+//    uint64_t val2 = 0;
+//    CHECK(c2.Get("Hello").GetValue(val2));
+//    CHECK(val2 == 5);
+//    CHECK(c2.Get("World").GetValue(val2));
+//    CHECK(val2 == 12);
+//
+//    //Todo:: Test instances list
+//    CHECK(c2.Delete());
+//
+//    return true;
+//}

@@ -51,6 +51,10 @@ namespace ContainersPP {
 			return list.fn;\
 		case ObjectEnums::list_static:\
 			return list_ptr.fn;\
+		case ObjectEnums::list_item:\
+			return list_item.fn;\
+		case ObjectEnums::const_list_item:\
+			return const_list_item.fn;\
 		default:\
 			break;\
 	}
@@ -69,6 +73,10 @@ namespace ContainersPP {
 			return ptr.fn;\
 		case ObjectEnums::attribute_ref:\
 			return atr.fn;\
+		case ObjectEnums::list_item:\
+			return list_item.fn;\
+		case ObjectEnums::const_list_item:\
+			return const_list_item.fn;\
 		default:\
 			break;\
 	}

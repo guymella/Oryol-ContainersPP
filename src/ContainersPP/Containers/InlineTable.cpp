@@ -75,6 +75,13 @@ void ContainersPP::iInlineTable::Remove(uint64_t index)
     UpdateFollowingOffsets(0, -(int64_t)sizeof(uint64_t));
 }
 
+void ContainersPP::iInlineTable::Clear()
+{
+    Buffer().Clear();
+    Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
+    Index()[0] = sizeof(uint64_t) * 2;
+}
+
 uint64_t ContainersPP::iInlineTable::StartOffset(uint64_t BlockID) const
 {
 	#ifdef DEFENSE
@@ -160,10 +167,40 @@ void ContainersPP::InlinePartition::Clear()
     Remove(0, Size());
 }
 
+ContainersPP::InlineSubTable::InlineSubTable(iInlineTable* Table, uint64_t BlockID) : block(Table, BlockID)
+{
+    if (Buffer().Size() < sizeof(uint64_t) * 2) {
+        Buffer().Clear();
+        Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
+        Index()[0] = sizeof(uint64_t) * 2;
+    }
+}
+
 ContainersPP::InlineSubTable::InlineSubTable(iInlineTable* Table, uint64_t BlockID, uint32_t PartitionCount) : block(Table, BlockID)
 {
     Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
     Index()[0] = sizeof(uint64_t) * 2;
     for (uint32_t i = 0; i < PartitionCount; i++) 
+        New();
+}
+
+ContainersPP::InlineFileTable::InlineFileTable(const char* foldername, uint64_t FileID) : block(foldername, FileID)
+{
+    if (Buffer().Size() < sizeof(uint64_t) * 2) {
+        Buffer().Clear();
+        Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
+        Index()[0] = sizeof(uint64_t) * 2;
+        block.Save();
+    }
+}
+
+ContainersPP::InlineFileTable::InlineFileTable(const char* foldername, uint64_t FileID, uint32_t PartitionCount) : block(foldername,FileID)
+{
+    //if (Buffer().Size() && Count() != PartitionCount)
+        //Clear();
+
+    Buffer().CopyBack((uint8_t*)Types::BASEDEFAULT, sizeof(uint64_t) * 2);
+    Index()[0] = sizeof(uint64_t) * 2;
+    for (uint32_t i = 0; i < PartitionCount; i++)
         New();
 }

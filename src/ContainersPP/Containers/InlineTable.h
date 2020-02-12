@@ -7,6 +7,7 @@
 
 //#include "ContainersPP/Interfaces/iTable.h"
 #include "Buffer.h"
+#include "FileBlock.h"
 
 namespace ContainersPP {
     class InlinePartition;
@@ -23,6 +24,7 @@ namespace ContainersPP {
         void Insert(uint64_t index);
         void Insert(uint64_t index, uint64_t newSize);
         void Remove(uint64_t index);
+        void Clear();
 
         /// get number of buffers
         uint64_t Count() const { return Buffer().Size() ? *(uint64_t*)Buffer().Data() : 0; };
@@ -120,9 +122,25 @@ namespace ContainersPP {
         ContainersPP::Buffer block;
     };
 
+    class InlineFileTable : public iInlineTable {
+    public:
+        InlineFileTable(const char* foldername, uint64_t FileID);
+        InlineFileTable(const char* foldername, uint64_t FileID, uint32_t PartitionCount);
+
+        bool Save() { return block.Save(); };
+        bool Delete() { return block.Delete(); };
+    protected:
+        virtual iBlockD& Buffer() override { return block; };
+        virtual const iBlockD& Buffer() const override { return block; };
+    private:
+        FileBlock block;
+    };
+
     class InlineSubTable : public iInlineTable {
     public:
-        InlineSubTable(iInlineTable* Table, uint64_t BlockID, uint32_t PartitionCount = 0);
+        InlineSubTable() {};
+        InlineSubTable(iInlineTable* Table, uint64_t BlockID);
+        InlineSubTable(iInlineTable* Table, uint64_t BlockID, uint32_t PartitionCount);
     protected:
         virtual iBlockD& Buffer() override { return block; };
         virtual const iBlockD& Buffer() const override { return block; };

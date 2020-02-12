@@ -32,6 +32,7 @@ fips_begin_module(ContainersPP)
         Object.h Object.cpp
         Catalogue.h Catalogue.cpp
         InlineTable.h InlineTable.cpp
+        CatalogueAllocator.h
     )
 
     fips_dir(Interfaces)

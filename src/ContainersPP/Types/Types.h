@@ -25,6 +25,8 @@ namespace ContainersPP {
         //typedef uintptr_t uintptr;
         //typedef unsigned char uchar;
 
+		//typedef int64_t size_t;
+
         static const int32_t InvalidIndex = -1;
         static const int32_t EndOfString = -1;
         static const int32_t EndOfFile = -1;

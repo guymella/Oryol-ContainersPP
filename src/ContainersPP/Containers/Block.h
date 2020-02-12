@@ -157,8 +157,13 @@ namespace ContainersPP {
 
     inline uint8_t* Block::AddInsert(uint64_t offset, uint64_t numBytes)
     {
+        
+        if (offset == Size())
+            return AddBack(numBytes);
+        int numMove = (int)(Size() - offset);
+
         alloc(Size() + numBytes);
-        Oryol::Memory::Move(Data(offset), Data(offset+ numBytes), (int)numBytes);
+        Oryol::Memory::Move(Data(offset), Data(offset+ numBytes), numMove);
         return Data(offset);
     }
 

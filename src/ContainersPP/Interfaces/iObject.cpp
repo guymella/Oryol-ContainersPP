@@ -44,13 +44,13 @@ namespace ContainersPP {
     /////////////////Object list
 
 
-    ObjectListRef<iObjectList*> iObjectList::GetIndex(uint64_t Index)
+    Object iObjectList::GetIndex(uint64_t Index)
     {
-        return ObjectListRef<iObjectList*>(this, Index);
+        return Object(this, Index);// ObjectListRef<iObjectList*>(this, Index);
     }
-    ObjectListRef<const iObjectList*> iObjectList::GetIndex(uint64_t Index) const
+    Object iObjectList::GetIndex(uint64_t Index) const
     {
-        return ObjectListRef<const iObjectList*>(this, Index);
+        return Object(this, Index); //ObjectListRef<const iObjectList*>(this, Index);
     }
     ;
 

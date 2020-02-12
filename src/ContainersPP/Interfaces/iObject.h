@@ -28,6 +28,8 @@ namespace ContainersPP {
     template <typename ObjectListPtr>
     class ObjectListRef;   
 
+    class Object;
+
     class iObjectList : public iObject {
     public:
         virtual void* Begin(uint64_t Index = 0) = 0;
@@ -35,8 +37,8 @@ namespace ContainersPP {
         //virtual void* Ptr(uint64_t Index) = 0;
         virtual bool Remove(uint32_t Index) = 0;
         virtual uint64_t Count() const = 0;
-        ObjectListRef<iObjectList*> GetIndex(uint64_t Index);
-        ObjectListRef<const iObjectList*> GetIndex(uint64_t Index) const;
+        Object GetIndex(uint64_t Index);
+        Object GetIndex(uint64_t Index) const;
         template <typename TYPE>
         bool GetIndexValue(uint32_t Index, TYPE& GetTo) const;
         template <typename TYPE>
@@ -65,7 +67,7 @@ namespace ContainersPP {
         uint64_t index = 0;
     };
 
-    class Object;
+    
 
     class iCatalogue : public iObjectList {
     public:
