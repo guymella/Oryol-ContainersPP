@@ -130,8 +130,10 @@ namespace ContainersPP {
     inline bool FileBlock::Delete()
     {
         Clear();
-        //remove(filename);
-        return !remove(filename);
+        bool removed = !remove(filename);
+        Oryol::Memory::Free(filename);
+        filename = nullptr;
+        return removed;
     }
 
     inline void FileBlock::CopyFileName(const char* FileName)

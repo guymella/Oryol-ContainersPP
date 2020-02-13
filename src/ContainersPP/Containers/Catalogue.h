@@ -110,7 +110,7 @@ namespace ContainersPP {
         FileCatalogue(const char* FolderName, uint64_t FileID);
         bool Save() { return table.Save(); };
         bool Delete() { return table.Delete(); };
-    protected:
+    //protected:
 
         virtual iInlineTable& Table() override { return table; };
         virtual iInlineTable& Data() override { return data; };

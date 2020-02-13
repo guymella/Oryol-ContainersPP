@@ -13,10 +13,82 @@ namespace ContainersPP {
         if (!Ptr())
             return false;
 
-        if (Type() == Types::baseTypes::uint8 || Type() == Types::baseTypes::uint16 || Type() == Types::baseTypes::uint32 || Type() == Types::baseTypes::uint64) {
+        //Types::baseTypes z;
+        switch (Type())
+        {
+        case ContainersPP::Types::boolean:
+            GetTo = (*(bool*)Ptr())?1:0;
+            return true;
+            break;
+        case ContainersPP::Types::uint8:
+            GetTo = *(uint8_t*)Ptr();
+            return true;
+        case ContainersPP::Types::int8:
+            if (*(int8_t*)Ptr() >= 0) {
+                GetTo = *(int8_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint16:
+            GetTo = *(uint16_t*)Ptr();
+            return true;
+        case ContainersPP::Types::int16:
+            if (*(int16_t*)Ptr() >= 0) {
+                GetTo = *(int16_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint32:
+            GetTo = *(uint32_t*)Ptr();
+            return true;
+            break;
+        case ContainersPP::Types::int32:
+            if (*(int32_t*)Ptr() >= 0) {
+                GetTo = *(int32_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint64:
             GetTo = *(uint64_t*)Ptr();
             return true;
+            break;
+        case ContainersPP::Types::int64:
+            if (*(int64_t*)Ptr() >= 0) {
+                GetTo = *(int64_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::float32:
+            if (*(float_t*)Ptr() >= 0) {
+                GetTo = (uint64_t)*(float_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::float64:
+            if (*(double_t*)Ptr() >= 0) {
+                GetTo = (uint64_t) * (double_t*)Ptr();
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::chr: //todo:: check parse
+            break;
+        case ContainersPP::Types::String: //todo:: check parse
+            break;
+        case ContainersPP::Types::SRef://todo:: check parse
+            break;
+        case ContainersPP::Types::PRef://todo:: check parse
+            break;
+        case ContainersPP::Types::LRef://todo:: check parse
+            break;        
+        default:
+            break;
         }
+
+        /*if (Type() == Types::baseTypes::uint8 || Type() == Types::baseTypes::uint16 || Type() == Types::baseTypes::uint32 || Type() == Types::baseTypes::uint64) {
+            GetTo = *(uint64_t*)Ptr();
+            return true;
+        }*/
+       
         return false;
     }
 
@@ -25,6 +97,76 @@ namespace ContainersPP {
     {
         if (!Ptr())
             return false;
+
+        switch (Type())
+        {
+        case ContainersPP::Types::boolean:
+            *(bool*)Ptr() = (setFrom) ? true : false;
+            return true;
+        case ContainersPP::Types::uint8:
+            if (setFrom <= std::numeric_limits<uint8_t>::max()) {
+                *(uint8_t*)Ptr() = (uint8_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::int8:            
+            if (setFrom <= std::numeric_limits<int8_t>::max()) {
+                *(int8_t*)Ptr() = (int8_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint16:
+            if (setFrom <= std::numeric_limits<uint16_t>::max()) {
+                *(uint16_t*)Ptr() = (uint16_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::int16:
+            if (setFrom <= std::numeric_limits<int16_t>::max()) {
+                *(int16_t*)Ptr() = (int16_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint32:
+            if (setFrom <= std::numeric_limits<uint32_t>::max()) {
+                *(uint32_t*)Ptr() = (uint32_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::int32:
+            if (setFrom <= std::numeric_limits<int32_t>::max()) {
+                *(int32_t*)Ptr() = (int32_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::uint64:
+            *(uint8_t*)Ptr() = (int8_t)setFrom;
+            return true;
+        case ContainersPP::Types::int64:
+            if (setFrom <= (uint64_t)std::numeric_limits<int64_t>::max()) {
+                *(int64_t*)Ptr() = (int64_t)setFrom;
+                return true;
+            }
+            return false;
+        case ContainersPP::Types::float32:
+            *(float_t*)Ptr() = (float_t)setFrom;
+            return true;            
+        case ContainersPP::Types::float64:
+            *(double_t*)Ptr() = (double_t)setFrom;
+            return true;
+        case ContainersPP::Types::chr: //todo:: check parse
+            break;
+        case ContainersPP::Types::String: //todo:: check parse
+            break;
+        case ContainersPP::Types::SRef://todo:: check parse
+            break;
+        case ContainersPP::Types::PRef://todo:: check parse
+            break;
+        case ContainersPP::Types::LRef://todo:: check parse
+            break;
+        default:
+            break;
+        }
 
         if (Type() == Types::baseTypes::uint8 || Type() == Types::baseTypes::uint16 || Type() == Types::baseTypes::uint32 || Type() == Types::baseTypes::uint64) {
             *(uint64_t*)Ptr() = setFrom;
