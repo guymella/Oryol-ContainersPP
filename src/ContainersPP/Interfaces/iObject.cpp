@@ -1186,7 +1186,7 @@ namespace ContainersPP {
         return Object(this, Index); //ObjectListRef<const iObjectList*>(this, Index);
     }
     ;
-
+    ///////////////////////////////////////////
     template <>
     bool ContainersPP::iObjectList::PushFront(const uint64_t& setFrom)
     {
@@ -1214,6 +1214,271 @@ namespace ContainersPP {
         }
         return false;
     }
+    ////////////////////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const uint32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint32 && pushFront()) {
+            *(uint32_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const uint32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint32 && pushBack()) {
+            *(uint32_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const uint32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint32 && insert(Index)) {
+            *(uint32_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    /////////////////////////////////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const uint16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint16 && pushFront()) {
+            *(uint16_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const uint16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint16 && pushBack()) {
+            *(uint16_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const uint16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint16 && insert(Index)) {
+            *(uint16_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    /////////////////////////////////////////////////////////////////
+
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const uint8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint8 && pushFront()) {
+            *(uint8_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const uint8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint8 && pushBack()) {
+            *(uint8_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const uint8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::uint8 && insert(Index)) {
+            *(uint8_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    ////////////////////////////////////////////////////////
+     ///////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const int64_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int64 && pushFront()) {
+            *(int64_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const int64_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int64 && pushBack()) {
+            *(int64_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const int64_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int64 && insert(Index)) {
+            *(int64_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    ////////////////////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const int32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int32 && pushFront()) {
+            *(int32_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const int32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int32 && pushBack()) {
+            *(int32_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const int32_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int32 && insert(Index)) {
+            *(int32_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    /////////////////////////////////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const int16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int16 && pushFront()) {
+            *(int16_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const int16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int16 && pushBack()) {
+            *(int16_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const int16_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int16 && insert(Index)) {
+            *(int16_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    /////////////////////////////////////////////////////////////////
+
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const int8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int8 && pushFront()) {
+            *(int8_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const int8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int8 && pushBack()) {
+            *(int8_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const int8_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::int8 && insert(Index)) {
+            *(int8_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    ///////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const float_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float32 && pushFront()) {
+            *(float_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const float_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float32 && pushBack()) {
+            *(float_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const float_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float32 && insert(Index)) {
+            *(float_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    /////////////////////////////////////////////////////////////////
+
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const double_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float64 && pushFront()) {
+            *(double_t*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const double_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float64 && pushBack()) {
+            *(double_t*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const double_t& setFrom)
+    {
+        if (Type() == Types::baseTypes::float64 && insert(Index)) {
+            *(double_t*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
 	iCatalogue& iCatalogue::GetRef(const Types::KeyString& key)
 	{
         return GetRef(key.Data(), (uint8_t)key.Size());

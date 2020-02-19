@@ -50,6 +50,16 @@ int main(void) {
 	CHECK(TestAllocator());
 	CHECK(TestFileAllocator());
 	CHECK(TestObject());
+	CHECK((TestObject<uint32_t, Types::baseTypes::uint32>()));
+	CHECK((TestObject<uint16_t, Types::baseTypes::uint16>()));
+	CHECK((TestObject<uint8_t, Types::baseTypes::uint8>()));
+	CHECK((TestObject<int64_t, Types::baseTypes::int64>()));
+	CHECK((TestObject<int32_t, Types::baseTypes::int32>()));
+	CHECK((TestObject<int16_t, Types::baseTypes::int16>()));
+	CHECK((TestObject<int8_t, Types::baseTypes::int8>()));
+	CHECK((TestObject<float_t, Types::baseTypes::float32>()));
+	CHECK((TestObject<double_t, Types::baseTypes::float64>()));
+	
 	CHECK(TestCatalogue());
 	CHECK(TestFileCatalogue());
 
