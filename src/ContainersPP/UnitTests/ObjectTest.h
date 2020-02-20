@@ -110,9 +110,107 @@ bool TestCatalogue() {
     CHECK(c.Get("World").GetValue(val));
     CHECK(val == 12);
 
-    //Todo:: Test instances list
+    // Test fixed List
+
+    CHECK(c.DefineAttribute("Hellos", Types::baseTypes::int32,5));
+    CHECK(c.DefineAttribute("Worlds", Types::baseTypes::chr,12));
+    Object o = c.Get("Hellos");
+    CHECK(o.Count() == 5);
+    CHECK(o.SetIndexValue(0, -1));
+    CHECK(o.SetIndexValue(4, -2));
+    int32_t* op = (int32_t *)o.Begin();
+    op[1] = 1;
+    op[2] = 2;
+    op[3] = 3;
+
+    CHECK(op[0] == -1);
+    CHECK(op[1] == 1);
+    CHECK(op[2] == 2);
+    CHECK(op[3] == 3);
+    CHECK(op[4] == -2);
+    
+
+    int32_t valo = 0;
+    CHECK(o.GetIndexValue(4, valo));
+    CHECK(valo == -2);
+    CHECK(o.GetIndexValue(3, valo));
+    CHECK(valo == 3);
+    CHECK(o.GetIndexValue(2, valo));
+    CHECK(valo == 2);
+    op = (int32_t*)o.Ptr();
+    CHECK(op[0] == -1);
+    CHECK(op[1] == 1);
+
+    Object o2 = c.Get("Worlds");
+    CHECK(o2.Count() == 12);
+    CHECK(o2.SetIndexValue(0, 'a'));
+    CHECK(o2.SetIndexValue(4, 'e'));
+    char* o2p = (char*)o2.Begin();
+    o2p[1] = 'b';
+    o2p[2] = 'c';
+    o2p[3] = 'd';
+    
+    Object o25 = o2.GetIndex(5);
+    o25.SetValue('f');
+
+    CHECK(o2p[0] == 'a');
+    CHECK(o2p[1] == 'b');
+    CHECK(o2p[2] == 'c');
+    CHECK(o2p[3] == 'd');
+    CHECK(o2p[4] == 'e');
+    CHECK(o2p[5] == 'f');
+
+    // Test Flex List
+
+    CHECK(c.DefineAttribute("sups", Types::baseTypes::int32, 0));
+    CHECK(c.DefineAttribute("vons", Types::baseTypes::chr, 0));
+    Object of = c.Get("sups");
+    CHECK(of.Count() == 0);
+    CHECK(of.PushBack(-1));
+    CHECK(of.PushBack(1));
+    CHECK(of.PushBack(2));
+    CHECK(of.PushBack(3));
+    CHECK(of.PushBack(-2));
+    CHECK(of.Count() == 5);
+
+    op = (int32_t*)of.Begin();
+   
+    CHECK(op[0] == -1);
+    CHECK(op[1] == 1);
+    CHECK(op[2] == 2);
+    CHECK(op[3] == 3);
+    CHECK(op[4] == -2);
+
+    of.Insert(3, 5);
+    CHECK(of.Count() == 6);
+    op = (int32_t*)of.Begin();
+
+    CHECK(op[0] == -1);
+    CHECK(op[1] == 1);
+    CHECK(op[2] == 2);
+    CHECK(op[3] == 5);
+    CHECK(op[4] == 3);
+    CHECK(op[5] == -2);
 
 
+    Object of2 = c.Get("vons");
+    CHECK(of2.Count() == 0);
+    CHECK(of2.PushBack('a'));
+    CHECK(of2.PushBack('b'));
+    CHECK(of2.PushBack('c'));
+    CHECK(of2.PushBack('d'));
+    CHECK(of2.PushBack('e'));
+    CHECK(of2.PushBack('f'));
+    CHECK(of2.Count() == 6);
+
+    o2p = (char*)of2.Begin();
+   
+    CHECK(o2p[0] == 'a');
+    CHECK(o2p[1] == 'b');
+    CHECK(o2p[2] == 'c');
+    CHECK(o2p[3] == 'd');
+    CHECK(o2p[4] == 'e');
+    CHECK(o2p[5] == 'f');
 
     return true;
 }

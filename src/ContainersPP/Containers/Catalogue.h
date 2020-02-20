@@ -57,7 +57,7 @@ namespace ContainersPP {
         virtual iCatalogue& GetRefByIndex(uint64_t Index) override { return NULLOBJECT; };//TODO::
         virtual iCatalogue& CDRRef(uint64_t BaseIndex) override { return NULLOBJECT; };//TODO::
         virtual Object Get(const uint8_t* Key, uint8_t KeyLen) override;
-        virtual Object GetByIndex(uint64_t Index) override { return Object(SchemaList()[Index].type, this, SchemaList()[Index].offset); };//TODO::
+        virtual Object GetByIndex(uint64_t Index) override;
         virtual Object CDR(uint64_t BaseIndex) override { return Object(); };//TODO::
         CatTypeDescr* SchemaList() { return (CatTypeDescr*)Schema()[0].Data(); };
         const CatTypeDescr* SchemaList() const { return (CatTypeDescr*)Schema()[0].Data(); };

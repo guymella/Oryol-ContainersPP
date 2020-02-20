@@ -99,6 +99,8 @@ namespace ContainersPP {
 			return list.fn;\
 		case ObjectEnums::list_static:\
 			return list_ptr.fn;\
+		case ObjectEnums::attribute_ref:\
+			return atr.fn;\
 		default:\
 			break;\
 	}

@@ -12,6 +12,7 @@
 
 #include "ContainersPP/Interfaces/iObject.h"
 #include "ContainersPP/Interfaces/iAllocator.h"
+#include "InlineTable.h"
 
 namespace ContainersPP {
 
@@ -79,17 +80,23 @@ namespace ContainersPP {
 
     class Attribute_Ref : public NullObject {
     public:
-        Attribute_Ref(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset) : type(valueType), ptr(Catalogue), offset(DataOffset) {};
+        Attribute_Ref(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset, uint32_t Count = 1) : type(valueType), ptr(Catalogue), offset(DataOffset),count(Count) {};
         Attribute_Ref(const Attribute_Ref& rhs) : type(rhs.type), ptr(rhs.ptr), offset(rhs.offset) {};
         virtual Types::baseTypes Type() const override { return type; };
         virtual void* Ptr() override { return (uint8_t*)(ptr->Ptr()) + offset; };
         virtual const void* Ptr() const override { return (uint8_t*)(ptr->Ptr()) + offset; };
+        virtual void* Begin(uint64_t Index = 0) override { return (count > 1) ? (uint8_t*)Ptr() + (Types::SizeOf(Type())*Index): nullptr; };
+        virtual const void* Begin(uint64_t Index = 0) const override { return (count > 1) ? (uint8_t*)Ptr() + (Types::SizeOf(Type()) * Index) : nullptr; };
+        //virtual bool Remove(uint32_t Index) override { return false; };
+        virtual uint64_t Count() const override { return (count > 1) ? count : 0; };
+
 
         friend Object;
     private:
         Types::baseTypes type;
         iCatalogue* ptr;
         uint16_t offset;
+        uint32_t count;
     };
 
     class Primitive_List_Static_Ref : public NullObject {
@@ -113,6 +120,7 @@ namespace ContainersPP {
     public:
         Primitive_List_Ref(Types::baseTypes valueType, iAllocator* Allocator, uint64_t BlockID) : type(valueType), allocatorPtr(Allocator), blockID(BlockID) {};
         Primitive_List_Ref(Types::baseTypes valueType, iBlockD& Block) : type(valueType), blockPtr(&Block), blockID(std::numeric_limits<uint64_t>::max()) {};
+        Primitive_List_Ref(Types::baseTypes valueType, InlinePartition Partition) : type(valueType), partition(Partition), blockPtr(&partition), blockID(std::numeric_limits<uint64_t>::max()) {};
         Primitive_List_Ref(const Primitive_List_Ref& rhs) : type(rhs.type), blockPtr(rhs.blockPtr), blockID(rhs.blockID) {};
 
         virtual Types::baseTypes Type() const override { return type; };
@@ -134,10 +142,12 @@ namespace ContainersPP {
         uint64_t UnitSize() const { return Types::SizeOf(Type()); };
         Types::baseTypes type;
         uint64_t blockID;
+        InlinePartition partition;
         union {
             iAllocator* allocatorPtr;
-            iBlockD* blockPtr;
+            iBlockD* blockPtr;            
         };
+        
     };
 
 
@@ -169,7 +179,7 @@ namespace ContainersPP {
         Object(Types::baseTypes valueType, void* Ptr) : ptr(valueType, Ptr), wrapperType(ObjectEnums::objectTypes::primitive_ref) {};
 
         Object(Attribute_Ref& Attribute) : atr(Attribute), wrapperType(ObjectEnums::objectTypes::attribute_ref) {};
-        Object(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset) : atr(valueType, Catalogue, DataOffset), wrapperType(ObjectEnums::objectTypes::attribute_ref) {};
+        Object(Types::baseTypes valueType, iCatalogue* Catalogue, uint16_t DataOffset, uint32_t Count = 1) : atr(valueType, Catalogue, DataOffset, Count), wrapperType(ObjectEnums::objectTypes::attribute_ref) {};
         
 
         Object(Primitive_List_Static_Ref& List) : list_ptr(List), wrapperType(ObjectEnums::objectTypes::list_static) {};
@@ -178,6 +188,7 @@ namespace ContainersPP {
         Object(Primitive_List_Ref& List) : list(List), wrapperType(ObjectEnums::objectTypes::list) {};
         Object(Types::baseTypes valueType, iAllocator* Allocator, uint64_t BlockID) : list(valueType, Allocator, BlockID), wrapperType(ObjectEnums::objectTypes::list) {};
         Object(Types::baseTypes valueType, iBlockD& Block) : list(valueType, Block), wrapperType(ObjectEnums::objectTypes::list) {};
+        Object(Types::baseTypes valueType, InlinePartition Block) : list(valueType, Block), wrapperType(ObjectEnums::objectTypes::list) {};
 
         Object(ObjectListRef<iObjectList*>& List_Item) : list_item(List_Item), wrapperType(ObjectEnums::objectTypes::list_item) {};
         Object(iObjectList* list_ptr, uint64_t Index) : list_item(list_ptr, Index), wrapperType(ObjectEnums::objectTypes::list_item) {};

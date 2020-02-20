@@ -432,14 +432,16 @@ namespace ContainersPP {
             *(bool*)Ptr() = (setFrom) ? true : false;
             return true;
         case ContainersPP::Types::uint8:
-            SetMax(uint8_t, uint16_t);
+            *(uint8_t*)Ptr() = setFrom;
+            return true;
         case ContainersPP::Types::int8:
-            SetMax(int8_t, uint16_t);
+            SetMax(int8_t, uint8_t);
         case ContainersPP::Types::uint16:
             *(uint16_t*)Ptr() = setFrom;
             return true;
         case ContainersPP::Types::int16:
-            SetMax(int16_t, uint16_t);
+            *(int16_t*)Ptr() = setFrom;
+            return true;
         case ContainersPP::Types::uint32:
             *(uint32_t*)Ptr() = setFrom;
             return true;
@@ -473,8 +475,117 @@ namespace ContainersPP {
         }
         return false;
     }
+    //////////////////
+    template <>
+    bool ContainersPP::iObject::GetValue<char>(char& GetTo) const
+    {
+        if (!Ptr())
+            return false;
+
+        //Types::baseTypes z;
+        switch (Type())
+        {
+        case ContainersPP::Types::boolean:
+            GetTo = (*(bool*)Ptr()) ? 1 : 0;
+            return true;
+            break;
+        case ContainersPP::Types::uint8:
+            GetTo = *(uint8_t*)Ptr();
+            return true;
+        case ContainersPP::Types::int8:
+            getpos(int8_t);
+        case ContainersPP::Types::uint16:
+            GetMax(uint16_t, uint8_t)
+        case ContainersPP::Types::int16:
+            GetPosMax(int16_t, uint8_t)
+        case ContainersPP::Types::uint32:
+            GetMax(uint32_t, uint8_t)
+        case ContainersPP::Types::int32:
+            GetPosMax(int32_t, uint8_t)
+        case ContainersPP::Types::uint64:
+            GetMax(uint64_t, uint8_t)
+        case ContainersPP::Types::int64:
+            GetPosMax(int64_t, uint8_t)
+        case ContainersPP::Types::float32:
+            GetPosMax(float_t, uint8_t)
+        case ContainersPP::Types::float64:
+            GetPosMax(double_t, uint8_t)
+        case ContainersPP::Types::chr: //todo:: check parse
+            GetTo = *(char*)Ptr();
+            return true;
+        case ContainersPP::Types::String: //todo:: check parse
+            break;
+        case ContainersPP::Types::SRef://todo:: check parse
+            break;
+        case ContainersPP::Types::PRef://todo:: check parse
+            break;
+        case ContainersPP::Types::LRef://todo:: check parse
+            break;
+        default:
+            break;
+        }
+
+        return false;
+    }
 
 
+    template<>
+    bool ContainersPP::iObject::SetValue<char>(const char& setFrom)
+    {
+        if (!Ptr())
+            return false;
+
+        switch (Type())
+        {
+        case ContainersPP::Types::boolean:
+            *(bool*)Ptr() = (setFrom) ? true : false;
+            return true;
+        case ContainersPP::Types::uint8:
+            *(uint8_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::int8:
+            SetMax(int8_t, uint8_t);
+        case ContainersPP::Types::uint16:
+            *(uint16_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::int16:
+            *(int16_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::uint32:
+            *(uint32_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::int32:
+            *(int32_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::uint64:
+            *(uint64_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::int64:
+            *(int64_t*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::float32:
+            *(float_t*)Ptr() = (float_t)setFrom;
+            return true;
+        case ContainersPP::Types::float64:
+            *(double_t*)Ptr() = (double_t)setFrom;
+            return true;
+        case ContainersPP::Types::chr: //todo:: check parse
+            *(char*)Ptr() = setFrom;
+            return true;
+        case ContainersPP::Types::String: //todo:: check parse
+            break;
+        case ContainersPP::Types::SRef://todo:: check parse
+            break;
+        case ContainersPP::Types::PRef://todo:: check parse
+            break;
+        case ContainersPP::Types::LRef://todo:: check parse
+            break;
+        default:
+            break;
+        }
+        return false;
+    }
+    
     ///////////////////////////////////////////////INT
     template <>
     bool ContainersPP::iObject::GetValue<int64_t>(int64_t& GetTo) const
@@ -1301,6 +1412,37 @@ namespace ContainersPP {
     }
     ////////////////////////////////////////////////////////
      ///////////////////////////////////////////
+
+    template <>
+    bool ContainersPP::iObjectList::PushFront(const char& setFrom)
+    {
+        if (Type() == Types::baseTypes::chr && pushFront()) {
+            *(char*)Begin() = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::PushBack(const char& setFrom)
+    {
+        if (Type() == Types::baseTypes::chr && pushBack()) {
+            *(char*)Begin(Count() - 1) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    template<>
+    bool iObjectList::Insert(uint32_t Index, const char& setFrom)
+    {
+        if (Type() == Types::baseTypes::chr && insert(Index)) {
+            *(char*)Begin(Index) = setFrom;
+            return true;
+        }
+        return false;
+    }
+    ////////////////////////////////////////////////////////
+     ///////////////////////////////////////////
+
     template <>
     bool ContainersPP::iObjectList::PushFront(const int64_t& setFrom)
     {
