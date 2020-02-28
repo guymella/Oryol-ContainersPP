@@ -45,7 +45,7 @@ namespace ContainersPP {
 	}
 
 
-	FileCatalogue::FileCatalogue(const char* FolderName, uint64_t FileID) : table(FolderName, FileID)
+	FileCatalogue::FileCatalogue(const char* FolderName, uint64_t FileID, iProfile* ProfilePtr) : profile(ProfilePtr), table(FolderName, FileID)
 	{
 		if (table.Count() > 2) {//exists so assign subtables
 			data = InlineSubTable(&table, 0);

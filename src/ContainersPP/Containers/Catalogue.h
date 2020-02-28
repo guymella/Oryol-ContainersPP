@@ -76,11 +76,14 @@ namespace ContainersPP {
         virtual iIndexTrie& Index() = 0;
         virtual iInlineTable& Schema() = 0;
         virtual const iInlineTable& Schema() const = 0;
+
+        virtual iProfile& Profile() = 0;
+        virtual const iProfile& Profile() const = 0;
     };
 
     class Catalogue : public CatalogueBase {
     public:
-        Catalogue() : table(3), data(&table, 0,1), schema(&table, 1,1), index(&table, 2) {};
+        Catalogue(iProfile* ProfilePtr = nullptr) : profile(ProfilePtr), table(3), data(&table, 0,1), schema(&table, 1,1), index(&table, 2) {};
         
     protected:        
 
@@ -90,8 +93,11 @@ namespace ContainersPP {
         virtual iIndexTrie& Index() override { return index; };
         virtual iInlineTable& Schema() override { return schema; };
         virtual const iInlineTable& Schema() const override { return schema; };
+
+        virtual iProfile& Profile() override { return *profile; };
+        virtual const iProfile& Profile() const override { return *profile; };
     private:
-        
+        iProfile* profile;
         
         
         //uint16_t EndOffset();
@@ -107,7 +113,7 @@ namespace ContainersPP {
 
     class FileCatalogue : public CatalogueBase {
     public:
-        FileCatalogue(const char* FolderName, uint64_t FileID);
+        FileCatalogue(const char* FolderName, uint64_t FileID, iProfile* ProfilePtr = nullptr);
         bool Save() { return table.Save(); };
         bool Delete() { return table.Delete(); };
     //protected:
@@ -118,8 +124,11 @@ namespace ContainersPP {
         virtual iIndexTrie& Index() override { return index; };
         virtual iInlineTable& Schema() override { return schema; };
         virtual const iInlineTable& Schema() const override { return schema; };
-    private:
 
+        virtual iProfile& Profile() override { return *profile; };
+        virtual const iProfile& Profile() const override { return *profile; };
+    private:
+        iProfile* profile;
 
 
         //uint16_t EndOffset();

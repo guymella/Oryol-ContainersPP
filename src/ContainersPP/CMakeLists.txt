@@ -33,6 +33,7 @@ fips_begin_module(ContainersPP)
         Catalogue.h Catalogue.cpp
         InlineTable.h InlineTable.cpp
         CatalogueAllocator.h
+        PackageAllocator.h
     )
 
     fips_dir(Interfaces)
@@ -84,6 +85,7 @@ fips_begin_app(test cmdline)
             AllocatorTest.h
             FileAllocatorTest.h
             ObjectTest.h
+            ProfileTest.h
         )
     fips_deps(ContainersPP)
 fips_end_app()

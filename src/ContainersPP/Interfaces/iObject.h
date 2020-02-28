@@ -109,5 +109,13 @@ namespace ContainersPP {
         return false;
     }
 
+    class iProfile {
+    public:
+        virtual iCatalogue& operator[](uint64_t index) = 0;
+        virtual const iCatalogue& operator[](uint64_t index) const = 0;
+        virtual uint64_t New() = 0;
+        virtual bool Delete(uint64_t ID) = 0;
+    };
+
 }
 #endif

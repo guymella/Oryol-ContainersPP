@@ -21,6 +21,7 @@
 #include "UnitTests/AllocatorTest.h"
 #include "UnitTests/FileAllocatorTest.h"
 #include "UnitTests/ObjectTest.h"
+#include "UnitTests/ProfileTest.h"
 
 
 //#include "Core/Containers/Array.h"
@@ -62,6 +63,8 @@ int main(void) {
 	
 	CHECK(TestCatalogue());
 	CHECK(TestFileCatalogue());
+
+	CHECK(TestProfile());
 
 	return 0;
 }
